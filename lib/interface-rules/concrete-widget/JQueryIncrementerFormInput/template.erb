@@ -1,0 +1,42 @@
+<input type="text" id="<%= id %>" name="<%= name %>" value="<%= content %>" class="qty <%= css_class %>" />
+<input type="button" value="-" id="<%= id %>_minus" class="qtyminus" />
+<input type="button" value="+" id="<%= id %>_plus" class="qtyplus" />
+
+<script>
+	
+	jQuery(document).ready(function(){
+    // This button will increment the value
+    $('#<%= id %>_plus').click(function(e){
+        // Stop acting like a button
+        e.preventDefault();
+        // Get its current value
+        var currentVal = parseInt($('#<%= id %>').val());
+        // If is not undefined
+        if (!isNaN(currentVal)) {
+            // Increment
+						<%= "if(currentVal < #{@max_value})" unless @max_value.nil? %>
+							$('#<%= id %>').val(currentVal + 1);
+        } else {
+            // Otherwise put a 0 there
+            $('#<%= id %>').val(0);
+        }
+    });
+    // This button will decrement the value till 0
+    $("#<%= id %>_minus").click(function(e) {
+        // Stop acting like a button
+        e.preventDefault();
+        
+        var currentVal = parseInt($('#<%= id %>').val());
+        // If it isn't undefined or its greater than 0
+        if (!isNaN(currentVal) && currentVal > 0) {
+            // Decrement one
+					<%= "if(currentVal > #{@min_value})" unless @min_value.nil? %>           
+						$('#<%= id %>').val(currentVal - 1);
+        } else {
+            // Otherwise put a 0 there
+            $('#<%= id %>').val(0);
+        }
+    });
+});
+	
+</script>

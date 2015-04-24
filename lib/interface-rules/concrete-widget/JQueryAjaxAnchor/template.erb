@@ -1,0 +1,14 @@
+<script type="text/javascript" charset="utf-8">
+	function loadjsfile(filename){
+		var fileref=document.createElement('script');
+		fileref.setAttribute("type","text/javascript");
+		fileref.setAttribute("src", filename);
+		if (typeof fileref!="undefined"){
+			document.getElementsByTagName("head")[0].appendChild(fileref);
+		}
+	}
+	if(!$){loadjsfile('/_shared/js/jquery-1.7.2.min.js');}	
+	loadjsfile('<%=self.relative_path%>js/jquery_ajax_anchor.js');
+	
+</script>
+<a href="javascript:void(0);" onclick="jquery_ajax_anchor_get_data('<%= @url%>', '<%= @result_element_id%>','<%= self.relative_path%>')" id="<%=@id%>" class="<%= @css_class%>" title="<%= @title %>"> <%= content %> </a>

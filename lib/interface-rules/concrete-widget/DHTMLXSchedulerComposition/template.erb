@@ -1,0 +1,121 @@
+<style type="text/css" media="screen">
+		html, body{
+			height:100%;
+			overflow:hidden;
+		}
+	</style>
+<div id="<%= @id %>" class="dhx_cal_container <%= @css_class %>" style='<%= @css_style%>'>
+		<div class="dhx_cal_navline" >
+			<div class="dhx_cal_prev_button">&nbsp;</div>
+			<div class="dhx_cal_next_button">&nbsp;</div>
+			<div class="dhx_cal_today_button"></div>
+			<div class="dhx_cal_date"></div>
+			<div class="dhx_cal_tab" name="day_tab" style="right:204px;"></div>
+			<div class="dhx_cal_tab" name="week_tab" style="right:140px;"></div>
+			<div class="dhx_cal_tab" name="timeline_tab" style="right:280px;"></div>
+			<div class="dhx_cal_tab" name="month_tab" style="right:76px;"></div>
+		</div>
+		<div class="dhx_cal_header">
+		</div>
+		<div class="dhx_cal_data">
+		</div>		
+</div>
+
+<script type="text/javascript" charset="utf-8">
+		var sections = [];
+		var entries = [];
+		function init_<%= @id %>(start_date, x_size, x_step, x_start_hour) {
+
+			scheduler.locale.labels.timeline_tab = "Timeline";
+			scheduler.locale.labels.section_custom="Section";
+			scheduler.config.details_on_create=true;
+			scheduler.config.details_on_dblclick=true;
+			scheduler.config.xml_date="%Y-%m-%d %H:%i";
+			scheduler.config.readonly=true;
+			scheduler.xy.bar_height = 35;
+
+			//===============
+			//Configuration
+			//===============
+			
+			scheduler.createTimelineView({
+				name: "timeline",
+				x_unit: "hour",
+				x_date: "%H:%i",
+				x_step: x_step,
+				x_size: x_size,
+				x_start: x_start_hour,
+				y_unit: sections,
+				y_property: "section_id",
+				render: "bar"
+			});
+
+			//===============
+			//Data loading
+			//===============
+			scheduler.config.lightbox.sections=[
+				{name:"description", height:130, map_to:"text", type:"textarea" , focus:true},
+				{name:"custom", height:23, type:"select", options:sections, map_to:"section_id" },
+				{name:"time", height:72, type:"time", map_to:"auto"}
+			];
+			
+			scheduler.init('<%= @id %>', start_date, "timeline");
+			scheduler.parse( entries	,"json");
+		}
+		
+		var source_data = <%= @entries.to_json || [] %>;
+		
+		$(document).ready(function() {
+			 
+			
+			 
+			 $('#<%= @id %>').parent().css('width', '100%');
+			 $('#<%= @id %>').parent().css('height', '100%');
+			
+			 var minor_dt = source_data[0]['start_date']
+			 for (var i in source_data){
+				source_data[i]['section_id']  = i;
+				sections.push({'key': i, 'label': source_data[i]['section']});
+				entries.push(source_data[i]);
+				if (source_data[i]['start_date'] < minor_dt){
+					minor_dt = source_data[i]['start_date'];
+				}
+			 }
+			var st_dt = minor_dt.match(/(\d\d\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d)/i);
+			var start_dt = new Date(st_dt[1], (st_dt[2] - 1), st_dt[3]);
+			var x_size = 24;
+			var x_step = 1;
+			
+			var x_start_hour = Math.round((parseInt(st_dt[4]) / 2) + 0.1) ;
+			
+			//x_start_hour = x_start_hour % 2 == 0 ? x_start_hour : x_start_hour - 1;
+			
+			init_<%= @id %>(start_dt, x_size, x_step, parseInt(st_dt[4]));
+		});
+		
+		function open_ajax_dialog(dialog_id, url, dialog_title, height, width){
+			$('#'+escape(dialog_id)).remove();
+            var dialog_window = $("<div></div>").attr('id', escape(dialog_id));
+            
+			dialog_window.dialog({
+            modal: true,
+            open: function ()
+            {
+                var obj = $(this);
+								obj.html('<div id="loading_<%= @id %>" style="text-align:center;width:100%;"><img src="<%= self.relative_path %>images/ajax-loader.gif" align="absbottom" style="background: none;" /></div> ');
+								$.ajax({
+									url: url,
+									cache: false
+								}).done(function( html ) {
+									obj.html(html);
+								});
+            },         
+            height: height,
+            width: width,
+            title: dialog_title
+        });
+    
+		 }
+		
+</script>  
+

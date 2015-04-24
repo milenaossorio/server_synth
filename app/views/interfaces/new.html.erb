@@ -1,0 +1,20 @@
+<h1>Add interface</h1>
+
+<% form_for :interface, :url => { :action => "create" } do |f| %>
+  <%= f.error_messages %>
+
+  <p>
+    <%= f.label :name %><br />
+    <%= f.text_field :interface_name %>
+  </p>
+  <p>
+    <%= f.label :title %><br />
+    <%= f.text_field :interface_title %>
+  </p>
+
+  <p>
+    <%= f.submit 'Create' %>
+  </p>
+<% end %>
+
+<%= link_to 'Back', interfaces_path %>

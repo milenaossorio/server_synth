@@ -1,0 +1,120 @@
+#header {
+	background: #003366 !important;
+}
+
+.maincenter {
+    position: relative;
+    width: 960px;
+    margin: auto;
+}
+
+.pagestyle{
+    background: #ccffff;
+    padding: 4px;
+    margin: 0;
+    min-height:22px;	
+}
+
+.pagestyle .pageright{
+    margin: 0;
+    padding: 0;
+    position: absolute;
+    right: 5px;
+}
+
+#logo {
+    margin: 10px;
+		font-size: 50px;
+		font-weight: lighter;
+		color: #ccffff;
+}
+
+#menu {
+	background: #003366 !important;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    position: absolute;
+    top: 20px;
+    right: 20px;
+}
+
+
+/* TAB MENU   
+----------------------------------------------------------*/
+ul#menu li
+{
+    display: inline;
+    list-style: none;
+}
+
+ul#menu li a
+{
+    padding: 10px 10px;
+    font-size: 18px;
+    text-decoration: none;
+    line-height: 2.8em;
+    color: #ccffff;
+    font-style: italic;
+}
+
+ul#menu li a:hover
+{
+    text-decoration: none;
+}
+
+ul#menu li a:active
+{
+    text-decoration: none;
+}
+
+ul#menu li.selected a
+{
+    color: #ccffff;
+}
+
+/* End TAB MENU   
+----------------------------------------------------------*/
+.post {
+    background: #ccffff;
+    padding: 4px;
+    margin: 0;
+}
+
+.detailtitle {
+		font-size: 32px;
+		font-weight: lighter;
+		font-style: italic;
+		color: #ccffff;
+}
+
+.postteaser{
+	color: black;
+    display: inline-block;
+    border-bottom: 1px dotted;
+    width: 100%;
+    padding-bottom: 5px;
+    margin-top: 15px;	
+}
+
+.postteaser .post-title{
+	color: black;
+    font-size: 16px;
+    font-weight: bold;
+    width: 50%;
+}
+
+.postteaser .post-value{
+	color: black;
+    font-size: 16px;
+    width: 50%
+}
+
+.calendar-month span{
+	font-size: 14px;
+	text-decoration: none;
+	font-weight: lighter;
+	color: black;
+	float: left;
+	width: 100px;
+}

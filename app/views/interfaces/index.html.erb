@@ -1,0 +1,26 @@
+<table class="minimalist">
+  <tr>
+    <th>Name</th>
+    <!--th>Title</th-->
+		<th>Type</th>
+		<th>Weight</th>
+	<th align="right">Actions</th>
+  </tr>
+
+<% @interfaces.each do |interface| %>
+  <tr>
+    <td><%=h interface.interface_name.first %></td>
+    <!--td><%=h interface.interface_title.first %></td-->
+		<td><%=h interface.interface_description_type.first %></td>
+		<td align="center"><%=h interface.interface_weight.first.to_s %></td>
+    <td align="right">
+		<%= link_to 'Edit', :action => "edit", :id => interface %>
+		<%= link_to 'Remove', { :action => "destroy", :id => interface }, :confirm => 'Are you sure?', :method => :delete %>
+	</td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'Add interface', new_interface_path %>

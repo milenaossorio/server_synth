@@ -1,0 +1,11 @@
+.qty {float:left;margin-right:10px; text-align: center;}
+.qtyminus {float:left}
+.qtyplus, .qtyminus {
+    width: 40px;
+		height:40px;
+    text-align: center;
+		font-size:100%;
+		
+}
+.qtyplus {display:block;}
+

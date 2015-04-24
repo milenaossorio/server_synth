@@ -1,0 +1,161 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+  <title><%= controller_name.humanize %>: <%= controller.action_name %></title>
+ 
+  <%= jqgrid_stylesheets %> 
+  <%= jqgrid_javascripts %>
+  
+  <%= javascript_include_tag 'admin' %>
+  
+  <%= stylesheet_link_tag 'common' %>
+  <%= stylesheet_link_tag 'table-style' %>
+  <%= stylesheet_link_tag 'uidform' %>
+  <%= stylesheet_link_tag 'formalize' %>
+  <%= javascript_include_tag 'jquery/jquery-ui-1.7.3.custom.min' %>
+  <%= javascript_include_tag 'jquery/jquery.form' %>
+  <%= javascript_include_tag 'jquery/jquery.dform-0.1.4.min' %>
+  
+<%= javascript_include_tag 'jquery/jquery.formalize.min' %>
+  
+  <%= javascript_include_tag 'jquery.tabify' %>
+  
+	<%= stylesheet_link_tag 'codemirror/codemirror' %>
+  <%= stylesheet_link_tag 'codemirror/theme/blackboard' %>
+	<%= javascript_include_tag 'codemirror/codemirror' %>
+	<%= javascript_include_tag 'codemirror/mode/ruby/ruby' %>
+	<%= javascript_include_tag 'codemirror/mode/css/css' %>
+	<%= javascript_include_tag 'codemirror/mode/xml/xml' %>
+	<%= javascript_include_tag 'codemirror/mode/javascript/javascript' %>
+	<%= javascript_include_tag 'codemirror/util/searchcursor' %>	
+	<%= javascript_include_tag 'codemirror/util/match-highlighter' %>
+	
+  <script type="text/javascript">
+	
+		$(document).ready(function(){
+		   	$("#tabs").tabs({
+			    select: function(event, ui) {
+			        var url = $.data(ui.tab, 'load.tabs');
+			        if( url ) {
+			            location.href = url;
+			            return false;
+			        }
+			        return true;
+			    },
+				selected: <%= selected_tab %>
+			});		
+			
+		});
+		var editors = {}
+    function codemirror_instance(id, mode){
+      var mode = (mode == null ? 'ruby' : mode);
+			editors[id] = CodeMirror.fromTextArea(document.getElementById(id), {
+      mode: mode,
+      lineNumbers: true,
+      lineWrapping: true,
+      tabSize: 2,
+      theme: "default",
+      onCursorActivity: function() {
+        editors[id].matchHighlight("CodeMirror-matchhighlight");
+       // editors[id].setLineClass(hlLine, null, null);
+       // hlLine = editors[id].setLineClass(editor.getCursor().line, null, "activeline");
+        
+      }
+      });
+     // var hlLine = editors[id].setLineClass(0, "activeline");
+    }
+    function changeEditor(id, option, value){
+			editors[id].setOption(option, value);
+		}
+		
+	
+		
+		$(document).ready(function(){
+		   	$("#vertical_tabs").tabs({
+			    select: function(event, ui) {
+			        var url = $.data(ui.tab, 'load.tabs');
+			        if( url ) {
+			            location.href = url;
+			            return false;
+			        }
+			        return true;
+			    },
+				selected: <%= selected_vertical_tab %>
+			}).addClass('ui-tabs-vertical ui-helper-clearfix');
+			$("#vertical_tabs li").removeClass('ui-corner-top').addClass('ui-corner-left');
+		});
+	</script>
+	<style type="text/css"> 
+	/* Vertical Tabs
+	----------------------------------*/
+	.ui-tabs-vertical { border: 0; }
+	.ui-tabs-vertical .ui-tabs-nav { padding: .1em .1em .1em .1em; float: left; font-size: 0.9em;  }
+	.ui-tabs-vertical .ui-tabs-nav li { clear: left; width: 100%; border-bottom-width: 1px !important; border-right-width: 0 !important; margin: 0 -1px .2em 0; }
+	.ui-tabs-vertical .ui-tabs-nav li a { display:block; }
+	.ui-tabs-vertical .ui-tabs-nav li.ui-tabs-selected { padding-bottom: 0; padding-right: .1em; border-right-width: 1px; border-right-width: 1px; }
+	.ui-tabs-vertical .ui-tabs-panel { float: left; border: 1px solid #a6c9e2; background-color: #fff; font-size: .9em; }
+	
+  #loading { display: none; }
+	#loading .opaque {
+		position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:#000;
+    opacity:0.1;
+    z-index:50;
+	}
+	#loading .image{
+		position: absolute;
+		margin-top: 300px;
+		margin-left: 50%;
+		z-index: 49;
+	}
+	.CodeMirror {border: 1px solid #c0c0c0;min-width:700px;font-size:14px;}
+	.activeline {background: #e8f2ff !important;}
+	span.CodeMirror-matchhighlight { background: #e9e9e9 }
+  .CodeMirror-focused span.CodeMirror-matchhighlight { background: #e7e4ff; !important }
+  
+	</style>
+
+</head>
+<body>
+<div id="loading">
+	<div class="image"><%= image_tag "loading.gif" %></div>
+	<div class="opaque"></div>
+</div>
+
+<div class="ui-widget ui-widget-header ui-corner-all" style="padding: 1em 1em 1em 1em; margin-bottom: 5px;">Synth<span style="float:right;">Application: <a href="/execute/init" target="_blank"><%= Application.active.name %></a> (<%= link_to "Shutdown", { :controller => :applications, :action => :shutdown }, :confirm => "Are you sure you want to shutdown the \"#{Application.active.name}\" application?" %>)</span></div>
+<div id="tabs" style="font-size: 0.9em;">
+	
+    <ul>
+				<li><a href="<%= tab_url_for :home %>"><span>Home</span></a></li>
+        <li><a href="<%= tab_url_for :domain %>"><span>Domain</span></a></li>
+        <li><a href="<%= tab_url_for :navigation %>"><span>Navigation</span></a></li>
+        <li><a href="<%= tab_url_for :interface %>"><span>Interface</span></a></li>
+        <li><a href="<%= tab_url_for :behavior %>"><span>Behavior</span></a></li>
+    </ul>    
+	<div id="<%= tab_hash[controller_name] %>" style="padding: 5px 5px 5px 3px;">
+		
+		<div id="vertical_tabs">		
+			<ul>
+				<% for controller in tab_index_hash[tab_hash[controller_name]] %>
+		        	<li><a href="<%= vertical_tab_url_for(controller) %>"><span><%= controller_label[controller] or controller.titleize %></span></a></li>
+				<% end %>
+		    </ul>
+		
+			<div id="<%= controller_name %>" class="default-container">
+				<p style="color: green"><%= flash[:notice] %></p>
+				<%= yield %>
+			</div>
+		</div>
+	</div>
+	
+</div>
+
+</body>
+</html>

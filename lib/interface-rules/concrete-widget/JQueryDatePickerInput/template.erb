@@ -1,0 +1,10 @@
+<input type="text" id="<%= id %>" name="<%= name %>" value="<%= content %>" class="<%= css_class %>">
+<script>
+	$(function() { 
+		$( "#<%= id %>" ).datepicker({ 
+			dateFormat: "<%= @date_format %>",
+			minDate: <%= @min_date.to_json %>,
+			maxDate: <%= @max_date.to_json %>
+		}); 
+	});
+</script>

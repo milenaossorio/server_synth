@@ -1,0 +1,270 @@
+body{
+	margin:0;
+	padding:0;
+	 font-family: helvetica,arial,verdana,sans-serif;
+	 
+}
+#flights{
+	width:100%;
+	height:100%;
+
+}
+
+.ui-widget-header {
+	
+	background-color: #F2F7FA;
+	border: 1px solid #B7CFDF;
+	border-radius: 3px 3px 3px 3px;
+	color:#163F5E;
+}
+
+@font-face {
+    font-family: "museo";
+    font-style: normal;
+    font-weight: 700;
+    src: url("/fonts/Museo700-Regular-webfont.eot") format("eot"), url("/fonts/Museo700-Regular-webfont.woff") format("woff"), url("/fonts/Museo700-Regular-webfont.ttf") format("truetype"), url("/fonts/Museo700-Regular-webfont.svg#webfontgrqOO7iR") format("svg");
+}
+@font-face {
+    font-family: "museo";
+    font-style: normal;
+    font-weight: 500;
+    src: url("/fonts/Museo500-Regular-webfont.eot") format("eot"), url("/fonts/Museo500-Regular-webfont.woff") format("woff"), url("/fonts/Museo500-Regular-webfont.ttf") format("truetype"), url("/fonts/Museo500-Regular-webfont.svg#webfontl8OGJ79h") format("svg");
+}
+@font-face {
+    font-family: "museo";
+    font-style: normal;
+    font-weight: 300;
+    src: url("/fonts/Museo300-Regular-webfont.eot") format("eot"), url("/fonts/Museo300-Regular-webfont.woff") format("woff"), url("/fonts/Museo300-Regular-webfont.ttf") format("truetype"), url("/fonts/Museo300-Regular-webfont.svg#webfont5kLl7eKe") format("svg");
+}
+.museo {
+    font-family: 'museo';
+}
+
+
+body.search_page {
+    /*background: url("/images/airline-tickets/single_checked.png") repeat scroll -15px -25px #EDF3FE;*/
+		background: url("/images/airline-tickets/background.png") ;
+    bottom: 0;
+    color: #222222;
+    font-family: helvetica,arial,verdana,sans-serif;
+    font-size: 13px;
+    left: 0;
+    overflow-x: hidden;
+    position: absolute;
+    right: 0;
+    top: 0;
+    z-index: 1;
+}
+/*#333333*/
+.search-form .biglabel, #linkword-form .biglabel, .bounce-page .biglabel, .bounce-page label {
+    border: 1px solid transparent;
+    display: inline-block;
+    font-weight: bold;
+    height: 34px;
+    line-height: 34px;
+    margin-right: 14px;
+		
+    text-align: right;
+    vertical-align: top;
+    width: 96px;
+		float:left;
+}
+
+
+
+#header {
+	position: absolute;
+	top:50px;
+	left:50%;
+	margin-left:-470px;
+	width:100px;
+	z-index:20;
+	
+}
+body #index{background: url("/images/airline-tickets/background.png");}
+#index #header{
+	position:relative;top:0;left:0;
+	height:55px;
+	z-index:20;
+	background: url("/images/airline-tickets/background.png");
+	background-position: center 690px;
+	width:100%;
+  color: #222222;
+	margin:0;
+	padding-top:20px;
+}
+
+
+#header h1{
+	font-family: 'museo';
+	/*color:#0B2D4C;*/
+	color:#fff;
+	font-size:70px;
+	text-shadow: 0 3px 3px 0 #c0c0c0;
+	
+}
+
+#index #header h1, #index #header a{
+	font-family: 'museo';
+	padding:0px 0px 0px 40px;
+	color:#fff;
+	font-size:37px;
+	line-height:40px;
+	margin:0;
+	text-shadow: 0 3px 3px 0 #AAAAAA;
+	text-decoration:none;
+	z-index: 20px;
+}
+.dhx_cal_event_line {
+	padding-top:5px;
+	margin-top: 8px;
+	text-align:center;
+}
+
+.dhx_cal_event_line a{ 
+	line-height:22px;
+	text-decoration: none;
+  color:#163F5E;
+}
+
+.dhx_cal_event_line a:hover{ 
+	text-decoration: underline;
+}
+
+.dhx_matrix_scell b{font-size: 13px;}
+
+#index .dhx_cal_today_button{display:none;}
+
+.best_price{font-weight:bold;font-size:14px;}
+
+#legs {
+	position:relative;
+	left:50%;
+	margin-left:-182px;
+	margin-top:-45px;
+	-moz-user-select: -moz-none;
+	background-color: #EDF3FE;
+	border-radius: 20px 20px 20px 20px;
+	border: 1px solid #B7CFDF;
+	width:375px;
+	height:25px;
+  font-family: Tahoma;
+	font-size:14px;
+	padding:7px 0px 0px 15px;
+	text-align:center;
+	box-shadow: 0 2px 2px 0 #AAAAAA;
+	color: #92A9B8;
+}
+#legs img {
+	vertical-align: bottom;
+	margin:0px 5px 0px 5px;
+}
+#legs #leg_go {padding-right: 8px; border-right: 1px solid #AAAAAA;}
+#legs .current_leg {font-weight:700; color:#2F3A48}
+#legs #leg_go {float:left;}
+#legs label {padding-right:8px;}
+
+#no_flights{padding:10px;}
+
+.search-form input[type="text"], #linkword-form input[type="text"], .bounce-page input[type="text"], .search-form input[type="password"], #linkword-form input[type="password"], .bounce-page input[type="password"] {
+    border-width: 2px;
+    font-size: 100%;
+    height: 28px;
+    padding: 2px;
+    width: 345px;
+		display:block;
+		margin-bottom: 10px;
+}
+
+.bounce-page #pax{
+    border-width: 1px;
+    font-size: 80%;
+    height: 28px;
+    padding: 2px;
+    width: 60px;
+		
+		margin-bottom: 10px;
+}
+
+.bounce-page {
+    -moz-user-select: -moz-none;
+    background-color: white;
+    border-radius: 10px 10px 10px 10px;
+    color: #163F5E;
+    font-size: 22px;
+    position: relative;
+		padding:25px 15px 25px 15px;
+		width:500px;
+		top:90px;
+		left:50%;
+		margin-left:-200px;
+		height:auto;
+		box-shadow: 0 3px 3px 0 #AAAAAA;
+}
+
+button.darkbookingbutton {
+    -moz-appearance: none;
+    -moz-box-sizing: content-box;
+    -moz-font-feature-settings: inherit;
+    -moz-font-language-override: inherit;
+    font-family: inherit;
+    font-size: 18px;
+    font-size-adjust: inherit;
+    font-stretch: inherit;
+    font-style: inherit;
+    font-variant: inherit;
+    font-weight: inherit;
+    line-height: inherit;
+}
+
+input[type="submit"].darkbookingbutton {
+    background-image: url("/images/airline-tickets/sprites_bg.png");
+    background-position: 0 -94px;
+    background-repeat: repeat-x;
+    border: 1px solid #74A3D3;
+    border-radius: 3px 3px 3px 3px;
+    color: #163F5E;
+    cursor: pointer;
+    display: inline-block;
+    font-size: 18px;
+    height: 30px;
+    line-height: 30px;
+    padding: 1px 10px;
+    text-decoration: none;
+    white-space: nowrap;
+		float:right;
+		margin:0px 33px;
+}
+
+button {
+    margin: 0;
+    padding: 2px 6px 3px;
+}
+
+
+#flight_info{
+	font-size:14px;
+}
+
+#flight_info label{
+	font-weight:bold;
+	float:left;
+	display:block;
+	clear:both;
+	min-width:70px;
+	line-height:25px;
+}
+
+#flight_info span{
+	line-height:25px;
+	display:block;
+}
+
+#flight_info #fl_price{
+	color: #D9940C;
+	font-weight:bold;
+}
+
+#next_flight{
+float:right;
+}

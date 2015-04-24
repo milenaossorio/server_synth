@@ -1,0 +1,158 @@
+		body {
+			margin: 0;
+			padding: 0;
+            width:auto;
+			background:url("/app/images/nobg.png") repeat-x scroll 0 0 #FFFFFF;
+			background-position: 0 -40px;
+			
+			color: #003580;
+			font: small/1.2 Arial,Helvetica,sans-serif;
+      
+			font-size:14px;
+			line-height:18px;
+			min-width: 310px;
+		}
+		
+
+		a {text-decoration: none;}
+    a:hover {text-decoration: underline;}
+		
+		h2 {font-size:19px;}
+		/* header */
+		#header {
+		
+			margin:0 auto;
+			
+			
+			position:relative;
+			padding:0px 10px 0 10px;
+      height: 29px;
+      width:auto;
+		}
+		
+		
+		#header a {color:#fff;font-size:12px;}
+		#header h1 {	
+			color: white;
+			padding: 0.500em 0;
+			margin: 0;
+			font-size:25px;
+		
+			}
+		#header h1:after { content:".com";color:#0896FF; }
+		
+		#header #account_anchor {
+			float:right;
+
+			
+			margin-top:-27px;
+			color: #fff;
+			font-weight:bold;
+			}
+		
+		
+		#content {
+			
+      /*max-width:480px;*/
+			width:auto;
+			
+			
+			padding:10px;
+			
+		}
+		#hotel_name {text-align:left;padding:0;}
+		
+		#hotel_address { font-style: italic;display:block; margin-right: 20px;}
+		#hotel_category{float:left;}
+		.stars_3 { 
+			background-image: url("/images/stars/3.png") !important;
+			background-repeat: no-repeat !important;
+			display:block;
+			width:43px;
+			height:18px;
+			
+			
+		}
+		#hotel_description { }
+		
+		#hotel_images { width:295px; height: 170px;}
+		.anythingSlider-default {padding:0;background-color:#c0c0c0;float:none;margin-bottom:40px;width:auto;}
+		
+		.anythingSlider-default .forward  a, .anythingSlider-default .forward  a:hover{
+			
+			background-image: url("/images/next.png") !important;background-position: left center;margin-right:0px;
+		}
+		
+		.anythingSlider-default .back  a, .anythingSlider-default .back  a:hover{
+			background-image: url("/images/prev.png") !important;background-position: right center;margin-left:0px;
+		}
+		
+		
+		#rates, #search_rates{
+			background: none repeat scroll 0 0 #F5F5F5;
+			border-bottom: 1px solid #CECECE;
+			border-top: 1px solid #CECECE;
+			clear: both;
+			padding: 0 10px 10px 10px;
+
+		
+			overflow: hidden;
+			text-shadow: 1px 1px 0 #FFFFFF;
+		}
+		
+		#search_rates{text-align:center;line-height:35px;}
+		#search_rates h2{font-size:17px;line-height:20px;}
+		#search_rates label{display:block;float:left;min-width:70px;}
+		#search_rates input{height:25px;}
+		#search {
+			-webkit-box-shadow:rgba(0,0,0,0.0.1) 0 1px 0 0;
+			-moz-box-shadow:rgba(0,0,0,0.0.1) 0 1px 0 0;
+			box-shadow:rgba(0,0,0,0.0.1) 0 1px 0 0;
+			background-color:#5B74A8;
+			border:1px solid #29447E;
+			font-family:'Lucida Grande',Tahoma,Verdana,Arial,sans-serif;
+			font-size:14px;
+			font-weight:700;
+			
+			padding:2px 6px;
+			height:38px;
+			width:120px;
+			color:#fff;
+			margin:0 auto;
+			border-radius:5px;
+			-moz-border-radius:5px;
+			-webkit-border-radius:5px
+	}
+		
+		#rates .line { border-bottom:  1px solid #CECECE; height: 40px;background: #fff;	color: #0896FF;padding:6px;line-height:10px;}
+		
+		#rates .col1, #rates .col2, #rates .col3, #rates .highlight {display:block;float:left; padding:6px;}
+		#rates .col1{ float:none;}
+		#rates .col2{ display:block;float:left; padding:6px; color: #339900; font-weight: bold; font-size: 14px;}
+		
+		#rates .col3{ }
+		#rates .highlight {color:red;font-weight: normal; font-size: 14px;}
+		#rates .col4{ 
+			position: relative;
+			margin-top:-18px;
+			float:right;width:65px;height:35px;
+		
+		-webkit-box-shadow:rgba(0,0,0,0.0.1) 0 1px 0 0;
+			-moz-box-shadow:rgba(0,0,0,0.0.1) 0 1px 0 0;
+			box-shadow:rgba(0,0,0,0.0.1) 0 1px 0 0;
+			background-color:#5B74A8;
+			border:1px solid #29447E;
+			font-family:'Lucida Grande',Tahoma,Verdana,Arial,sans-serif;
+			font-size:14px;
+			font-weight:700;
+			
+			padding:2px 6px;
+					color:#fff;
+			
+			border-radius:5px;
+			-moz-border-radius:5px;
+			-webkit-border-radius:5px
+		}
+		
+		label {margin: 0 10px 0 10px;}
+		

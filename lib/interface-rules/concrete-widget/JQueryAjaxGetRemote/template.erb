@@ -1,0 +1,14 @@
+<div id="<%= @id %>" name="<%= @name %>" value="<%= @content %>" class="<%= @css_class %>"> <img src="<%= self.relative_path %>images/ajax-loader.gif" align="absbottom" style="background: none;" title="<%= @url%>"/> Loading </div>
+<script>
+	$(function() { 
+		$.ajax({
+        url: "<%= @url%>",
+        dataType: "html",
+        success: function(data) {
+          $('#<%=@id%>').html(data);
+        },
+        error: function(data){ $('#<%= @id %>').html("Request failed");}
+      });
+	
+	});
+</script>

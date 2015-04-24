@@ -1,0 +1,24 @@
+<% 
+	widget_name = @widget_hash.delete(:name)
+	examples = @widget_hash.delete(:examples)
+%>
+<h2> <%= widget_name %> </h2>
+<%	@widget_hash.each do |key, value| %>
+	<p>
+	<%= label_tag key %>: 
+
+	<% if value.is_a?(Array) %>
+		<dir>
+			
+			<%= render :partial => "hash_value", :collection => value, :as => :entry if key.to_s == 'parameters' %>
+			<% value.each do |value1| %>	<%= value1 %> <br />	<% end  unless key.to_s == 'parameters' %>
+			<%= value.size == 0 ? "None" : "" %>
+		</dir>		
+	<% else %>
+		<%= value %>
+	<% end %>
+	</p>
+<% end %>
+<%= label_tag :examples %>: 
+
+<pre><code><%	examples.each do |value| %><%= value.gsub(/\t\t/,"") %><% end %></code></pre>

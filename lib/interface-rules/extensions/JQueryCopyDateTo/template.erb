@@ -1,0 +1,13 @@
+<script>
+  function parse_<%= @id %>(dt_str){
+		var dt_parsed = Date.parse(dt_str).add(<%= @add_days.to_i%>).days();
+		return dt_parsed.toString("<%= @string_format%>");
+	}
+	$('#<%= @params[:from] or @parent.id %>').change(function(){ 
+		var value =  parse_<%= @id %>(this.value);
+		$('#<%= @target.id %>').val(value);
+		$('#<%= @target.id %>').html(value);
+		
+		});
+</script>
+

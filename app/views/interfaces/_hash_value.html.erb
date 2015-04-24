@@ -1,0 +1,5 @@
+<% entry.each do |key, value| %>
+<%= (key != entry.first.first) ? ", " : "" %>
+<%= label_tag key %>: <%= value %> 
+<% end %>
+<br />

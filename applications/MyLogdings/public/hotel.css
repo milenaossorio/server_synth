@@ -1,0 +1,93 @@
+		body {
+			margin: 0;
+			padding: 0;
+			
+			background:url("/app/images/nobg.png") repeat-x scroll 0 0 #FFFFFF;
+			color: #003580;
+			font: small/1.2 Arial,Helvetica,sans-serif;
+		
+		}
+		
+		
+		a {text-decoration: none;}
+    a:hover {text-decoration: underline;}
+		h2 {font-size:23px;}
+		/* header */
+		#header {
+			width:980px;
+			margin:0 auto;
+			background-position: 0 -21px;
+			padding: 11px 0px 15px 0px;
+			position:relative;
+			
+		}
+		
+		
+		#header a {color:#fff;font-size:12px;}
+		#header h1 {	
+			color: white;
+			padding: 0.500em 0;
+			margin: 0;
+			font-size: 30px;
+			}
+		#header h1:after { content:".com";color:#0896FF; }
+		
+		#header #account_anchor {float:right; margin-top:-15px;margin-right:35px;}
+		
+		
+		#content {
+			width:980px;
+			padding-top:0;
+			margin:0 auto;
+				line-height:18px;
+		}
+		#hotel_name {text-align:left;line-height: 25px;padding:0;}
+		
+		#hotel_address { font-style: italic;display:block;}
+		.stars_3 { 
+			background-image: url("/app/images/stars/3.png") !important;
+			background-repeat: no-repeat !important;
+			display:block;
+			width:43px;
+			height:18px;
+			
+			
+		}
+		#hotel_description {}
+		
+		#hotel_images { width:300px; height: 200px;}
+		.anythingSlider-default {float:right;margin-bottom:20px;}
+		
+		.anythingSlider-default .forward  a, .anythingSlider-default .forward  a:hover{
+			
+			background-image: url("/images/next.png") !important;background-position: left center;
+		}
+		
+		.anythingSlider-default .back  a, .anythingSlider-default .back  a:hover{
+			background-image: url("/images/prev.png") !important;background-position: right center;
+		}
+		
+		
+		#rates, #search_rates{
+			background: none repeat scroll 0 0 #F5F5F5;
+			border-bottom: 1px solid #CECECE;
+			border-top: 1px solid #CECECE;
+			clear: both;
+			padding: 0 10px 10px 10px;
+
+		
+			overflow: hidden;
+			text-shadow: 1px 1px 0 #FFFFFF;
+		}
+		#rates .line { border-bottom:  1px solid #CECECE; background: #fff;height:24px;	color: #0896FF;padding:6px;}
+		
+		#rates .col1, #rates .col2, #rates .col3, #rates .highlight {display:block;float:left; padding:6px;width:80px;}
+		#rates .col1{ width: 250px;}
+		#rates .col2{ width: 150px;display:block;float:left; padding:6px; color: #339900; font-weight: bold; font-size: 14px;}
+		
+		#rates .col3{ }
+		#rates .highlight {color:red;font-weight: normal; font-size: 14px;}
+		#rates .col4{ width: 80px;display:block;float:left;}
+		
+		label {margin: 0 10px 0 10px;}
+		

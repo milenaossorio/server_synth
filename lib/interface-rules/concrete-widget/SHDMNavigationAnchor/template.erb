@@ -1,0 +1,25 @@
+<% 
+		attribute = @content
+		if attribute.label.is_a?(Array)
+			if attribute.respond_to?(:target_context)
+				attr = attribute.label.map{|o| {:label => o[:label], :url => attribute.target_context.url((o[:params] || {}), o[:target_url]) } }
+			else
+				attr = attribute.label.map{|o| {:label => o[:label], :url => o[:target_url] }}
+			end
+		else                            
+			if attribute.respond_to?(:target_url)
+				attr = [ { :label => attribute.label.to_s, :url => attribute.target_url.to_s } ]
+			else
+				attr = [ attribute.label.to_s ]
+			end
+		end
+		counter = 0
+		attr.each do |value|
+			counter = counter + 1 %>
+			<% if value.is_a?(Hash) %>
+				<a class="<%= @css_class %>" id="<%= @id %>_<%= URI.encode(value[:label]) %>" title="<%= value[:label] %>" href="<%= value[:url] %>" > <%= value[:label] %> </a> <%= @separator if attr.size > counter %>
+			<% else %>
+				<%= value %>
+			<% end %>
+		<% end %>
+		
