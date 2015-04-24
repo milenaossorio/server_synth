@@ -87,6 +87,22 @@ class InContextClassesController < ApplicationController
       end
     end
   end
+  
+  def create_api
+    class_url   = params[:in_context_class].delete(:in_context_class_class)    
+    context_url = params[:in_context_class].delete(:in_context_class_context)
+
+    params[:in_context_class][:in_context_class_class]   = RDFS::Resource.new(class_url)
+    params[:in_context_class][:in_context_class_context] = RDFS::Resource.new(context_url)
+      
+    @in_context_class = SHDM::InContextClass.create(params[:in_context_class])
+    
+    if @in_context_class.save
+      render :json => {:status => :successful, :in_context_class => @in_context_class.uri}
+    else
+      render :json => {:status => :fail}
+    end
+  end
 
   # PUT /in_context_classes/1
   # PUT /in_context_classes/1.xml

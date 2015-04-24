@@ -77,6 +77,7 @@ ActionController::Routing::Routes.draw do |map|
   map.connect 'contexts/create_api', :controller => :contexts, :action => :create_api, :via => :post
   map.connect 'indexes/create_api', :controller => :indexes, :action => :create_api, :via => :post
   map.connect 'landmarks/create_api', :controller => :landmarks, :action => :create_api, :via => :post
+  map.connect 'in_context_classes/create_api', :controller => :in_context_classes, :action => :create_api, :via => :post
   map.connect 'ontologies/wizard/:url', :controller => :ontologies, :action => :wizard, :requirements => { :url => /.*/}
   map.connect 'ontologies/examples/:url', :controller => :ontologies, :action => :examples, :requirements => { :url => /.*/}
   map.connect 'ontologies/examples/:url', :controller => :ontologies, :action => :examples, :requirements => { :url => /.*/}
