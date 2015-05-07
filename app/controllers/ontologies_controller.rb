@@ -681,13 +681,13 @@ class OntologiesController < ApplicationController
                                                   {   :type => "constant",
                                                       :name => "context_query", 
                                                       :value => "#{@ontology.upcase}::#{klass[:className]}.find_all"
-                                                  },{ :type => "constant",
+                                                  }, {:type => "constant",
                                                       :name => "context_name",
                                                       :value => klass[:className]
                                                   }, {:type => "constant",
                                                       :name => "context_title",
                                                       :value => "#{klass[:className]}."
-                                                      }
+                                                  }
                                               ]
                                           }
                                           ]}}
