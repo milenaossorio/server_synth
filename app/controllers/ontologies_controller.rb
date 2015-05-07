@@ -12,7 +12,7 @@ class OntologiesController < ApplicationController
     @props_declaration = []
     @domain_classes = []
     @url = "http://www.semanticweb.org/milena/ontologies/2013/6/auction#"
-    @ontology = "auction::"
+    @ontology = "auction"
 
   end
   
@@ -249,7 +249,7 @@ class OntologiesController < ApplicationController
 
     resources.each{|x| 
       result += x.direct_properties.select{|y| !(y.first.is_a?(RDFS::Resource))}.
-                collect{|property| a = property.compact_uri.to_s; a.gsub(@url, @ontology) }
+                collect{|property| a = property.compact_uri.to_s; a.gsub("#{@ontology}:", "#{@ontology}::")}
     }
     result = result.uniq
     result = ["The '#{className}' has no datatype property"] if result.empty?
@@ -673,7 +673,24 @@ class OntologiesController < ApplicationController
     currentId = previousId + ".0"
     m = {:id => currentId, :type => 'select', :title => "What do you want to show from #{prefix} ontology?",
       :message => 'Class', :options => []}
-    m[:options] = classes.map{|klass| {:key=>(index += 1), :text=>klass[:className], :next=>currentId + "." + index.to_s}}
+    m[:options] = classes.map{|klass| {:key=>(index += 1), :text=>klass[:className], :next=>currentId + "." + index.to_s,
+                                :todo => [
+                                          {
+                                              :function_name => "save_value",
+                                              :params => [
+                                                  {   :type => "constant",
+                                                      :name => "context_query", 
+                                                      :value => "#{@ontology.upcase}::#{klass[:className]}.find_all"
+                                                  },{ :type => "constant",
+                                                      :name => "context_name",
+                                                      :value => klass[:className]
+                                                  }, {:type => "constant",
+                                                      :name => "context_title",
+                                                      :value => "#{klass[:className]}."
+                                                      }
+                                              ]
+                                          }
+                                          ]}}
     flowTree = {:value => m, :children => []}
 
     class_next_step(currentId, classes, flowTree);
@@ -689,14 +706,32 @@ class OntologiesController < ApplicationController
       currentId = (previousId + "." + (index += 1).to_s)
       m = {:id => currentId, :type => 'radio', :title => 'What do you want to do?',
         :message => '',
+        :pathName => name,
         :options => [
           {:key => 0, :text => "Show a list of #{name}(s) to be chosen", :next => currentId + ".0",
             :todo => [{:function_name => "save_value",
-              :params => [{:type => "constant", :name => "attribute_type", :value => "list"}]}]
+              :params => [{:type => "constant", :name => "landmark_type", :value => "list"}]},
+              {:function_name => "create_context_wizard",
+              :params => [{:type => "global_var", :name => "query", :value => "context_query"},
+                          {:type => "global_var", :name => "name", :value => "context_name"}, 
+                          {:type => "global_var", :name => "title", :value => "context_title"}],
+              :results => [{:name => "context", :global_var => "context_id"}, 
+                           {:name => "defaultIndex", :global_var => "index_id"}]}]
           },
           {:key => 1, :text => "Show the detail of a(n) #{name}", :next => currentId + ".1",
             :todo => [{:function_name => "save_value",
-              :params => [{:type => "constant", :name => "attribute_type", :value => "detail"}]}]
+              :params => [{:type => "constant", :name => "landmark_type", :value => "detail"}]},
+              {:function_name => "create_context_wizard",
+              :params => [{:type => "global_var", :name => "query", :value => "context_query"},
+                          {:type => "global_var", :name => "name", :value => "context_name"}, 
+                          {:type => "global_var", :name => "title", :value => "context_title"}],
+              :results => [{:name => "context", :global_var => "context_id"}, 
+                           {:name => "defaultIndex", :global_var => "index_id"}]},
+              {:function_name => "create_in_context_class_wizard",
+               :params => [{:type => "constant", :name => "class", :value => @url + name},
+                           {:type => "global_var", :name => "context", :value => "context_id"}],
+               :results => [{:name => "in_context_class", :global_var => "in_context_class_id"}]
+                        }]
           },
           {:key => 2, :text => "Define a computation using a(n) #{name}", :next => currentId + ".2"}
         ]}
@@ -713,6 +748,7 @@ class OntologiesController < ApplicationController
     currentId = previousId.to_s + ".0"
     m = {:id => currentId, :title => "", :type => "radioDetail", :message => className,
       :messageOptions => "Do you want to choose",
+      :pathName => "#{className} (List)",
       :options => [
         {:key => 0, :text => "one #{className}?", :next => currentId + ".0"},
         {:key => 1, :text => "more than one #{className}?", :next => currentId + ".1"}
@@ -729,22 +765,7 @@ class OntologiesController < ApplicationController
           [{:type => "img", :msg => '/assets/checkbox.png'},{:type => "text", :msg => examples[1].values.first}],
           [{:type => "img", :msg => '/assets/checkbox-checked.png'},{:type => "text", :msg => examples[2].values.first}]
         ]
-      ],
-      :todo => [
-                {
-                  :function_name => "create_context_wizard",
-                  :params => [
-                                {:type => "constant", :name => "query", :value => "AUCTION::#{className}.find_all"}, 
-                                {:type => "constant", :name => "name", :value => "#{className}"}, 
-                                {:type => "constant", :name => "title", :value => "#{className}."}
-                             ],
-                  :results => [
-                                {:name => "context", :global_var => "context_id"}, 
-                                {:name => "defaultIndex", :global_var => "index_id"}
-                              ]
-                }
       ]
-
     }
     child = {:value => m, :children => []}
     fatherFlowTree[:children].push(child)
@@ -757,16 +778,15 @@ class OntologiesController < ApplicationController
   def example_detail(previousId, className, datatypeProperties, fatherFlowTree) # 15, 42, ...
     props = get_compact_uri_datatype_properties(className)
     currentId = previousId.to_s + ".1"
-    m = {:id => currentId, :title => "#{className} detail", :type => "yesNoDetail", 
+    m = {:id => currentId, :title => "#{className} detail", :type => "yesNoDetail", :pathName => className,
       :scope => "new", :scope_value => {:show => "details", 
                                         :data => props.each_with_index.collect{|prop, index| index}, 
                                         :type => props.collect{"ComputedAttribute"},
                                         :queries => props.collect{|prop| "self." + prop},
                                         :names => datatypeProperties,
                                         :examples => []}, 
-      :example =>className,
-      :messageOptions => "Do you want to show other attributes of a(n) #{className} in the detail view?",
       :example => className,
+      :messageOptions => "Do you want to show other attributes of a(n) #{className} in the detail view?",
       :options => [
         {:key => 0, :text => "Yes", :next => currentId + ".0"},{:key => 1, :text => "No", :next => currentId + ".1"}
       ]
@@ -866,11 +886,11 @@ class OntologiesController < ApplicationController
         {:key => 1, :text => "No", :child => "End", :next => currentId + ".1",
            :todo => [
                       {
-                        :function_name => "create_computed_attributes_wizard",
+                        :function_name => "create_attributes_for_detail_wizard",
                         :params => [
                           {:type => "user_action", :name => "scope", :value => "scope"},
-                          {:type => "constant", :name => "ontology", :value => "#{@url[-2]}"}],
-                        :results => [{:name => "context", :global_var => "context_id"}]
+                          {:type => "global_var", :name => "in_context_class_id", :value => "in_context_class_id"},
+                          {:type => "constant", :name => "ontology", :value => @ontology}]
                       }
                     ]
         }
@@ -915,9 +935,10 @@ class OntologiesController < ApplicationController
         {:key => 1, :text => "No", :child => "End", :next => previousId[0, previousId.length-4] + ".1.1.1",
           :todo => [
                       {
-                        :function_name => "create_computed_attributes_wizard",
-                        :params => [{:type => "user_action", :name => "scope", :value => "scope"}],
-                        :results => [{:name => "context", :global_var => "context_id"}]
+                        :function_name => "create_attributes_for_index_wizard",
+                        :params => [{:type => "user_action", :name => "scope", :value => "scope"},
+                                    {:type => "global_var", :name => "index_id", :value => "index_id"}, 
+                                    {:type => "constant", :name => "ontology", :value => @ontology}]
                       }
                    ]
         }
@@ -1009,14 +1030,14 @@ class OntologiesController < ApplicationController
     m = {
       :id => currentId, :title => "What do you want to do?", :type => "radio", :message => "",
       :options => [
-        {:key => 0, :text => "Go to the pages index", :next => "0.0.0.0"},
+        {:key => 0, :text => "Go to the pages index", :next => "0.0.0.0", :child => "Landmark"},
         {:key => 1, :text => "Finish the application definition", :next => "#{currentId}."}
       ],
       :todo =>  [
               {
-                :function_name => "create_index_landmark_wizard",
+                :function_name => "create_landmark_wizard",
                 :params => [
-                    { :type => "globar_var", :name => "index_id", :value => "index_id"}, 
+                    { :type => "global_var", :name => "landmark_type", :value => "landmark_type"}, 
                     { :type => "constant", :name => "name", :value => className}
                 ]
               }, 
