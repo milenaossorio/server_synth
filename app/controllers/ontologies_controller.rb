@@ -45,8 +45,9 @@ class OntologiesController < ApplicationController
     # wizard.push(:klass => 'Produto', :value => {:collections => get_direct_collections_getting_properties_domain_range('Produto')}), 
       # :relations => @relations, :props_declaration => @props_declaration})
 
-      # domain_classes.each{ |klass| 
-      # wizard.push(:klass => klass[:className], :value => get_related_collectionsOld(klass[:className], 2))
+     # wizard = @domain_classes.collect{ |klass| 
+      # # wizard.push(:klass => klass[:className], :value => get_related_collectionsOld(klass[:className], 2))
+      # get_compact_uri_datatype_properties(klass[:className])
      # }
     
     # wizard.push(:klass => klass[:className], :value => get_datatype_properties(klass[:className]))
@@ -249,7 +250,7 @@ class OntologiesController < ApplicationController
 
     resources.each{|x| 
       result += x.direct_properties.select{|y| !(y.first.is_a?(RDFS::Resource))}.
-                collect{|property| a = property.compact_uri.to_s; a.gsub("#{@ontology}:", "#{@ontology}::")}
+                collect{|property| a = property.compact_uri.to_s; a.gsub("#{@url}", "#{@ontology}::")}
     }
     result = result.uniq
     result = ["The '#{className}' has no datatype property"] if result.empty?
@@ -716,7 +717,13 @@ class OntologiesController < ApplicationController
                           {:type => "global_var", :name => "name", :value => "context_name"}, 
                           {:type => "global_var", :name => "title", :value => "context_title"}],
               :results => [{:name => "context", :global_var => "context_id"}, 
-                           {:name => "defaultIndex", :global_var => "index_id"}]}]
+                           {:name => "defaultIndex", :global_var => "index_id"}]},
+              {:function_name => "set_anchor_values", 
+               :params => [{:type => "global_var", :name => "anchor_att_id", :value => "anchor_att_id"}, 
+                           {:type => "global_var", :name => "parent_id", :value => "index_id"},
+                           {:type => "constant", :name => "anchor_type", :value => "list"}
+                          ]
+              }]
           },
           {:key => 1, :text => "Show the detail of a(n) #{name}", :next => currentId + ".1",
             :todo => [{:function_name => "save_value",
@@ -731,7 +738,12 @@ class OntologiesController < ApplicationController
                :params => [{:type => "constant", :name => "class", :value => @url + name},
                            {:type => "global_var", :name => "context", :value => "context_id"}],
                :results => [{:name => "in_context_class", :global_var => "in_context_class_id"}]
-                        }]
+                        },
+              {:function_name => "set_anchor_values",
+               :params => [{:type => "global_var", :name => "anchor_att_id", :value => "anchor_att_id"}, 
+                           {:type => "global_var", :name => "parent_id", :value => "in_context_class_id"}, 
+                           {:type => "constant", :name => "anchor_type", :value => "details"}]
+              }]
           },
           {:key => 2, :text => "Define a computation using a(n) #{name}", :next => currentId + ".2"}
         ]}
@@ -1119,7 +1131,14 @@ class OntologiesController < ApplicationController
       :modal => "You clicked on the {0}. Do you want to use the {0} to choose a(n) #{className}",
       :options => [
         {:key => 0, :next => currentId + ".0"}
-      ]
+      ],
+      :todo => [{:function_name => "create_anchor_key", 
+                 :params => [{:type => "global_var", :name => "parent_id", :value => "index_id"}, 
+                             {:type => "user_definition", :name => "position", :value => "selectedOption"}
+                            ],
+                 :results => [{:name => "key", :global_var => "anchor_att_id"}]
+                }
+               ]
     }
     child = {:value => m, :children => []}
     fatherFlowTree[:children].push(child)
