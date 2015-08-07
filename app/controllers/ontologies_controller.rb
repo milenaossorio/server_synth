@@ -674,7 +674,7 @@ class OntologiesController < ApplicationController
     currentId = previousId + ".0"
     m = {:id => currentId, :type => 'select', :title => "What do you want to show from #{prefix} ontology?",
       :message => 'Class', :options => []}
-    m[:options] = classes.map{|klass| {:key=>(index += 1), :text=>klass[:className], :next=>currentId + "." + index.to_s,
+    m[:options] = classes.map{|klass| {:key=>(index += 1), :text=>klass[:className], :next=>currentId + "." + index.to_s + "-1",
                                 :todo => [
                                           {
                                               :function_name => "save_value",
@@ -694,9 +694,34 @@ class OntologiesController < ApplicationController
                                           ]}}
     flowTree = {:value => m, :children => []}
 
+    structure_name(currentId, classes, flowTree);
     class_next_step(currentId, classes, flowTree);
     return flowTree
   #wizard.push(m);
+  end
+  
+  def structure_name(previousId, classes, fatherFlowTree) #47
+    index = -1
+    aux = []
+    classes.each{ |name|
+      name = name[:className]
+      currentId = (previousId + "." + (index += 1).to_s)
+      m = {
+              :id => currentId  + "-1",
+              :type => "nodeName",
+              :title => "New navegational structure",
+              :message => "Name",
+              :options => [
+                {
+                  :key => 0,
+                  :next => currentId
+                }
+              ]
+          }
+      child = {:value => m, :children => []}
+      fatherFlowTree[:children].push(child)
+
+    }
   end
 
   def class_next_step(previousId, classes, fatherFlowTree) #5, 28, ...
@@ -709,31 +734,20 @@ class OntologiesController < ApplicationController
         :message => '',
         :pathName => name,
         :options => [
-          {:key => 0, :text => "Show a list of #{name}(s) to be chosen", :next => currentId + ".0",
+          {:key => 0, :text => "Show a list of #{name}(s) to be chosen", :next => currentId + ".0.0",
             :todo => [{:function_name => "save_value",
               :params => [{:type => "constant", :name => "landmark_type", :value => "list"}]},
-              {:function_name => "create_context_wizard",
-              :params => [{:type => "global_var", :name => "query", :value => "context_query"},
-                          {:type => "global_var", :name => "name", :value => "context_name"}, 
-                          {:type => "global_var", :name => "title", :value => "context_title"}],
-              :results => [{:name => "context", :global_var => "context_id"}, 
-                           {:name => "defaultIndex", :global_var => "index_id"}]},
               {:function_name => "set_anchor_values", 
                :params => [{:type => "global_var", :name => "anchor_att_id", :value => "anchor_att_id"}, 
                            {:type => "global_var", :name => "parent_id", :value => "index_id"},
-                           {:type => "constant", :name => "anchor_type", :value => "list"}
+                           {:type => "constant", :name => "anchor_type", :value => "list"},
+                           {:type => "global_var", :name => "index", :value => "index_id"}
                           ]
               }]
           },
           {:key => 1, :text => "Show the detail of a(n) #{name}", :next => currentId + ".1",
             :todo => [{:function_name => "save_value",
-              :params => [{:type => "constant", :name => "landmark_type", :value => "detail"}]},
-              {:function_name => "create_context_wizard",
-              :params => [{:type => "global_var", :name => "query", :value => "context_query"},
-                          {:type => "global_var", :name => "name", :value => "context_name"}, 
-                          {:type => "global_var", :name => "title", :value => "context_title"}],
-              :results => [{:name => "context", :global_var => "context_id"}, 
-                           {:name => "defaultIndex", :global_var => "index_id"}]},
+              :params => [{:type => "constant", :name => "landmark_type", :value => "details"}]},
               {:function_name => "create_in_context_class_wizard",
                :params => [{:type => "constant", :name => "class", :value => @url + name},
                            {:type => "global_var", :name => "context", :value => "context_id"}],
@@ -741,51 +755,60 @@ class OntologiesController < ApplicationController
                         },
               {:function_name => "set_anchor_values",
                :params => [{:type => "global_var", :name => "anchor_att_id", :value => "anchor_att_id"}, 
-                           {:type => "global_var", :name => "parent_id", :value => "in_context_class_id"}, 
-                           {:type => "constant", :name => "anchor_type", :value => "details"}]
+                           {:type => "global_var", :name => "parent_id", :value => "context_id"}, 
+                           {:type => "constant", :name => "anchor_type", :value => "details"},
+                           {:type => "global_var", :name => "index", :value => "index_id"}]
               }]
-          },
-          {:key => 2, :text => "Define a computation using a(n) #{name}", :next => currentId + ".2"}
-        ]}
+          }
+        ],
+        :todo => [{:function_name => "create_context_wizard",
+                   :params => [{:type => "global_var", :name => "query", :value => "context_query"}, 
+                               {:type => "global_var", :name => "name", :value => "context_name"},
+                               {:type => "global_var", :name => "title", :value => "context_title"}],
+                    :results => [{:name => "context", :global_var => "context_id"}, 
+                                 {:name => "defaultIndex", :global_var => "index_id"}]
+                  }]
+      }
       child = {:value => m, :children => []}
       fatherFlowTree[:children].push(child)
-      example_list(currentId, name, get_examples_for(name, @max_number_examples, 'label'), child)
+      #example_list(currentId, name, get_examples_for(name, @max_number_examples, 'label'), child)
+      example_list_choose_one_more_attributes_question(previousId +".0", name, get_examples_for(name, @max_number_examples, 'label'), child)
       example_detail(currentId, name, get_datatype_properties(name), child)
 
     }
 
   end
 
-  def example_list(previousId, className, examples, fatherFlowTree) # 6, 29, ...
-    currentId = previousId.to_s + ".0"
-    m = {:id => currentId, :title => "", :type => "radioDetail", :message => className,
-      :messageOptions => "Do you want to choose",
-      :pathName => "#{className} (List)",
-      :options => [
-        {:key => 0, :text => "one #{className}?", :next => currentId + ".0"},
-        {:key => 1, :text => "more than one #{className}?", :next => currentId + ".1"}
-      ],
-      :details =>
-      [
-        [
-          [{:type => "text", :msg => examples[0].values.first}],
-          [{:type => "text", :msg => examples[1].values.first}],
-          [{:type => "text", :msg => examples[2].values.first }]
-        ],
-        [
-          [{:type => "img", :msg => '/assets/checkbox-checked.png'},{:type => "text", :msg => examples[0].values.first}],
-          [{:type => "img", :msg => '/assets/checkbox.png'},{:type => "text", :msg => examples[1].values.first}],
-          [{:type => "img", :msg => '/assets/checkbox-checked.png'},{:type => "text", :msg => examples[2].values.first}]
-        ]
-      ]
-    }
-    child = {:value => m, :children => []}
-    fatherFlowTree[:children].push(child)
-    examples = get_examples_for(className, 3, 'label');
-    example_list_choose_one_more_attributes_question(currentId, className, examples, child)
-    example_list_choose_more_than_one_more_attributes_question(currentId, className, examples, child)
-
-  end
+  # def example_list(previousId, className, examples, fatherFlowTree) # 6, 29, ...
+    # currentId = previousId.to_s + ".0"
+    # m = {:id => currentId, :title => "", :type => "radioDetail", :message => className,
+      # :messageOptions => "Do you want to choose",
+      # :pathName => "#{className} (List)",
+      # :options => [
+        # {:key => 0, :text => "one #{className}?", :next => currentId + ".0"},
+        # {:key => 1, :text => "more than one #{className}?", :next => currentId + ".1"}
+      # ],
+      # :details =>
+      # [
+        # [
+          # [{:type => "text", :msg => examples[0].values.first}],
+          # [{:type => "text", :msg => examples[1].values.first}],
+          # [{:type => "text", :msg => examples[2].values.first }]
+        # ],
+        # [
+          # [{:type => "img", :msg => '/assets/checkbox-checked.png'},{:type => "text", :msg => examples[0].values.first}],
+          # [{:type => "img", :msg => '/assets/checkbox.png'},{:type => "text", :msg => examples[1].values.first}],
+          # [{:type => "img", :msg => '/assets/checkbox-checked.png'},{:type => "text", :msg => examples[2].values.first}]
+        # ]
+      # ]
+    # }
+    # child = {:value => m, :children => []}
+    # fatherFlowTree[:children].push(child)
+    # examples = get_examples_for(className, 3, 'label');
+    # example_list_choose_one_more_attributes_question(currentId, className, examples, child)
+    # example_list_choose_more_than_one_more_attributes_question(currentId, className, examples, child)
+# 
+  # end
 
   def example_detail(previousId, className, datatypeProperties, fatherFlowTree) # 15, 42, ...
     props = get_compact_uri_datatype_properties(className)
@@ -903,6 +926,18 @@ class OntologiesController < ApplicationController
                           {:type => "user_action", :name => "scope", :value => "scope"},
                           {:type => "global_var", :name => "in_context_class_id", :value => "in_context_class_id"},
                           {:type => "constant", :name => "ontology", :value => @ontology}]
+                      },
+                      {
+                        :function_name => "pop_global_var_is_not_empty",
+                        :params => [{:type => "constant", :name => "key", :value => "landmark_type"}]
+                      }, 
+                      {
+                        :function_name => "pop_global_var_is_not_empty",
+                        :params => [{:type => "constant", :name => "key", :value => "index_id"}]
+                      }, 
+                      {
+                        :function_name => "pop_global_var_is_not_empty",
+                        :params => [{:type => "constant", :name => "key", :value => "context_id"}]
                       }
                     ]
         }
@@ -951,6 +986,18 @@ class OntologiesController < ApplicationController
                         :params => [{:type => "user_action", :name => "scope", :value => "scope"},
                                     {:type => "global_var", :name => "index_id", :value => "index_id"}, 
                                     {:type => "constant", :name => "ontology", :value => @ontology}]
+                      },
+                      {
+                        :function_name => "pop_global_var_is_not_empty",
+                        :params => [{:type => "constant", :name => "key", :value => "landmark_type"}]
+                      }, 
+                      {
+                        :function_name => "pop_global_var_is_not_empty",
+                        :params => [{:type => "constant", :name => "key", :value => "index_id"}]
+                      }, 
+                      {
+                        :function_name => "pop_global_var_is_not_empty",
+                        :params => [{:type => "constant", :name => "key", :value => "context_id"}]
                       }
                    ]
         }
@@ -1127,14 +1174,16 @@ class OntologiesController < ApplicationController
     m = {
       :id => currentId, :title => "Select where one should click to choose a(n) #{className}",
       :type => "attributeForChoosing", :message => "#{className}s", :example => className,
+      :scope => "new", 
+      :scope_value => {:show => "none", :data => [], :type => [], :queries => [], :names => [], :examples => []},
       :originalModal => "You clicked on the {0}. Do you want to use the {0} to choose a(n) #{className}",
       :modal => "You clicked on the {0}. Do you want to use the {0} to choose a(n) #{className}",
       :options => [
-        {:key => 0, :next => currentId + ".0"}
+        {:key => 0, :next => currentId + ".0-H"}
       ],
       :todo => [{:function_name => "create_anchor_key", 
                  :params => [{:type => "global_var", :name => "parent_id", :value => "index_id"}, 
-                             {:type => "user_definition", :name => "position", :value => "selectedOption"}
+                             {:type => "user_action", :name => "selectedAttribute", :value => "selectedOption"}
                             ],
                  :results => [{:name => "key", :global_var => "anchor_att_id"}]
                 }
@@ -1162,7 +1211,15 @@ class OntologiesController < ApplicationController
   def choose_relations_of_path(previousId, className, fatherFlowTree) #12
     currentId = previousId.to_s + ".0"
     m = {
-      :id => currentId, :title => "Select the relationships", :type => "path", :message => "Suggested path", :next => currentId + ".0"
+      :id => currentId, :title => "Select the relationships", :type => "path", :message => "Suggested path", :next => currentId + ".0",
+      :todo => [{
+                  :function_name => "get_query_expression_from_path_wizard",
+                  :params => [{:type => "user_action", :name => "scope", :value => "scope"}, 
+                              {:type => "constant", :name => "ontology", :value => "auction"}],
+                  :results => [{:name => "query", :global_var => "context_query"}, 
+                               {:name => "context_name", :global_var => "context_name"}, 
+                               {:name => "first_class", :global_var => "context_title"}]
+                }]
     }
     child = {:value => m, :children => []}
     fatherFlowTree[:children].push(child)
@@ -1203,7 +1260,15 @@ class OntologiesController < ApplicationController
   def choose_relations_of_path_detail(previousId, className, fatherFlowTree) #21
     currentId = previousId.to_s + ".0"
     m = {
-      :id => currentId, :title => "Select the relationships", :type => "path", :message => "Suggested path", :next => currentId + ".0"      
+      :id => currentId, :title => "Select the relationships", :type => "path", :message => "Suggested path", :next => currentId + ".0",
+      :todo => [{
+                  :function_name => "get_query_expression_from_path_wizard",
+                  :params => [{:type => "user_action", :name => "scope", :value => "scope"}, 
+                              {:type => "constant", :name => "ontology", :value => "auction"}],
+                  :results => [{:name => "query", :global_var => "context_query"}, 
+                               {:name => "context_name", :global_var => "context_name"}, 
+                               {:name => "first_class", :global_var => "context_title"}]
+                }]      
     }
 
     child = {:value => m, :children => []}
@@ -1263,7 +1328,15 @@ class OntologiesController < ApplicationController
   def choose_relations_of_path_1(previousId, className, fatherFlowTree) #45
     currentId = previousId.to_s + ".0"
     m = {
-      :id => currentId, :title => "Select the relationships", :type => "path", :message => "Suggested path", :next => currentId + ".0"
+      :id => currentId, :title => "Select the relationships", :type => "path", :message => "Suggested path", :next => currentId + ".0",
+      :todo => [{
+                  :function_name => "get_query_expression_from_path_wizard",
+                  :params => [{:type => "user_action", :name => "scope", :value => "scope"}, 
+                              {:type => "constant", :name => "ontology", :value => "auction"}],
+                  :results => [{:name => "query", :global_var => "context_query"}, 
+                               {:name => "context_name", :global_var => "context_name"}, 
+                               {:name => "first_class", :global_var => "context_title"}]
+                }]
     }
     child = {:value => m, :children => []}
     fatherFlowTree[:children].push(child)
@@ -1275,11 +1348,27 @@ class OntologiesController < ApplicationController
     index = -1
     currentId = previousId + ".0"
     m = {:id => currentId, :type => 'hidden', :options => []}
-    m[:options] = @domain_classes.map{|klass| {:key=>(index += 1), :text=>klass[:className], :next=>currentId[0,7] + "." + index.to_s}}
+    m[:options] = @domain_classes.map{|klass| {:key=>(index += 1), :text=>klass[:className], :next=>currentId[0,7] + "." + index.to_s + "-1"}}
     
     child = {:value => m, :children => []}
     fatherFlowTree[:children].push(child)      
     
+  end
+  
+  def hidden_window(previousId, className, relatedCollections, prefix, fatherFlowTree) #48
+    index = 0
+    currentId = previousId + ".0"
+    m = {:id => currentId + "-H", :type => 'select', :title => "What do you want to show from #{prefix} ontology?",
+      :mainclass => className, :message => 'Class', :options => []}
+    m = {
+          :id => currentId, :type => "hiddenInitPath",
+          :options => [{:key => 0, :text => "Default", :next => currentId}]
+        }
+        
+    m[:options] = relatedCollections.map{|klass| {:key=>(index += 1), :text=>klass, :next=>currentId[0, previousId.length-12] + "." + index-1.to_s + ".0.0.1.0.0"}}
+    
+    child = {:value => m, :children => []}
+    fatherFlowTree[:children].push(child)
   end
     
 end
