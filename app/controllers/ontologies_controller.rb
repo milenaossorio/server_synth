@@ -683,9 +683,6 @@ class OntologiesController < ApplicationController
                                                       :name => "context_query", 
                                                       :value => "#{@ontology.upcase}::#{klass[:className]}.find_all"
                                                   }, {:type => "constant",
-                                                      :name => "context_name",
-                                                      :value => klass[:className]
-                                                  }, {:type => "constant",
                                                       :name => "context_title",
                                                       :value => "#{klass[:className]}."
                                                   }
@@ -716,7 +713,19 @@ class OntologiesController < ApplicationController
                   :key => 0,
                   :next => currentId
                 }
-              ]
+              ],
+              :value => name,
+              :todo => [
+                        {
+                            :function_name => "save_value",
+                            :params => [
+                                {:type => "user_action",
+                                    :name => "context_name",
+                                    :value => "value"
+                                }
+                            ]
+                        }
+                        ]
           }
       child = {:value => m, :children => []}
       fatherFlowTree[:children].push(child)
@@ -734,7 +743,7 @@ class OntologiesController < ApplicationController
         :message => '',
         :pathName => name,
         :options => [
-          {:key => 0, :text => "Show a list of #{name}(s) to be chosen", :next => currentId + ".0.0",
+          {:key => 0, :text => "Show a list of #{name}(s) to be chosen", :next => currentId + ".0",
             :todo => [{:function_name => "save_value",
               :params => [{:type => "constant", :name => "landmark_type", :value => "list"}]},
               {:function_name => "set_anchor_values", 
@@ -772,7 +781,7 @@ class OntologiesController < ApplicationController
       child = {:value => m, :children => []}
       fatherFlowTree[:children].push(child)
       #example_list(currentId, name, get_examples_for(name, @max_number_examples, 'label'), child)
-      example_list_choose_one_more_attributes_question(previousId +".0", name, get_examples_for(name, @max_number_examples, 'label'), child)
+      example_list_choose_one_more_attributes_question(currentId, name, get_examples_for(name, @max_number_examples, 'label'), child)
       example_detail(currentId, name, get_datatype_properties(name), child)
 
     }
