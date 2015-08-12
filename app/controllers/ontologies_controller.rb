@@ -1083,7 +1083,7 @@ class OntologiesController < ApplicationController
       :modal => "You clicked on the {0}. Do you want to use the {0} to choose a(n) #{className}",
       :example => className,
       :options => [
-        {:key => 0, :next => previousId[0, previousId.length-6] + ".0.0.1.0.0"}
+        {:key => 0, :next => previousId[0, previousId.length-4] + ".0.1.0.0-H"}
       ]
     }
     child = {:value => m, :children => []}
@@ -1200,7 +1200,7 @@ class OntologiesController < ApplicationController
     }
     child = {:value => m, :children => []}
     fatherFlowTree[:children].push(child)
-    
+    hidden_window(currentId, className, "auction", child)
     class_step_1(currentId, className, get_related_collections(className), "auction", child) #43
 
   end
@@ -1364,17 +1364,22 @@ class OntologiesController < ApplicationController
     
   end
   
-  def hidden_window(previousId, className, relatedCollections, prefix, fatherFlowTree) #48
+  def hidden_window(previousId, className, prefix, fatherFlowTree) #48
     index = 0
     currentId = previousId + ".0"
-    m = {:id => currentId + "-H", :type => 'select', :title => "What do you want to show from #{prefix} ontology?",
-      :mainclass => className, :message => 'Class', :options => []}
+
     m = {
-          :id => currentId, :type => "hiddenInitPath",
+          :id => currentId + "-H", :type => "hiddenInitPath",
           :options => [{:key => 0, :text => "Default", :next => currentId}]
         }
         
-    m[:options] = relatedCollections.map{|klass| {:key=>(index += 1), :text=>klass, :next=>currentId[0, previousId.length-12] + "." + index-1.to_s + ".0.0.1.0.0"}}
+    m[:options] += @domain_classes.map{|klass| 
+      {
+        :key=>(index += 1), 
+        :text=>klass[:className], 
+        :next=>currentId[0, previousId.length-12] + "." + (index-1).to_s + ".0.0.1.0.0"
+      }
+    }
     
     child = {:value => m, :children => []}
     fatherFlowTree[:children].push(child)
