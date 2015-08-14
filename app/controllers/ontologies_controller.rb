@@ -845,7 +845,7 @@ class OntologiesController < ApplicationController
     props = get_compact_uri_datatype_properties(className)
     currentId = previousId.to_s + ".0"
     m = {
-      :id => currentId, :title => "", :type => "infoWithOptions", 
+      :id => currentId, :title => "PUT TITLE 30", :type => "infoWithOptions", 
       :scope => "new", :scope_value => {:show => "table", 
                                         :data => [0], 
                                         :type => props.collect{"ComputedAttribute"},
@@ -920,7 +920,7 @@ class OntologiesController < ApplicationController
     currentId = previousId.to_s + ".1"
     m = {
       :id => currentId,
-      :title => "",
+      :title => "PUT TITLE",
       :type => "loop",
       :message => "#{className} Detail",
       :messageOptions => "Do you want to choose anything to navigate to other screen?",
@@ -988,7 +988,7 @@ class OntologiesController < ApplicationController
       :example => className,
       :options => [
         {:key => 0, :text => "Yes", :child => "Yes", :next => currentId + ".0"},
-        {:key => 1, :text => "No", :child => "End", :next => previousId[0, previousId.length-4] + ".1.1.1",
+        {:key => 1, :text => "No", :child => "End", :next => previousId[0, previousId.length-4] + ".1.1.1.1",
           :todo => [
                       {
                         :function_name => "create_attributes_for_index_wizard",
@@ -1220,8 +1220,9 @@ class OntologiesController < ApplicationController
   def choose_relations_of_path(previousId, className, fatherFlowTree) #12
     currentId = previousId.to_s + ".0"
     m = {
-      :id => currentId, :title => "Select the relationships", :type => "path", :message => "Suggested path", :next => currentId + ".0",
-      :todo => [{
+      :id => currentId, :title => "Select the relationships", :type => "path", :message => "Suggested path", :next => currentId + ".0"
+=begin
+      , :todo => [{
                   :function_name => "get_query_expression_from_path_wizard",
                   :params => [{:type => "user_action", :name => "scope", :value => "scope"}, 
                               {:type => "constant", :name => "ontology", :value => "auction"}],
@@ -1229,6 +1230,7 @@ class OntologiesController < ApplicationController
                                {:name => "context_name", :global_var => "context_name"}, 
                                {:name => "first_class", :global_var => "context_title"}]
                 }]
+=end
     }
     child = {:value => m, :children => []}
     fatherFlowTree[:children].push(child)
@@ -1269,15 +1271,17 @@ class OntologiesController < ApplicationController
   def choose_relations_of_path_detail(previousId, className, fatherFlowTree) #21
     currentId = previousId.to_s + ".0"
     m = {
-      :id => currentId, :title => "Select the relationships", :type => "path", :message => "Suggested path", :next => currentId + ".0",
-      :todo => [{
+      :id => currentId, :title => "Select the relationships", :type => "path", :message => "Suggested path", :next => currentId + ".0"
+=begin      
+      , :todo => [{
                   :function_name => "get_query_expression_from_path_wizard",
                   :params => [{:type => "user_action", :name => "scope", :value => "scope"}, 
                               {:type => "constant", :name => "ontology", :value => "auction"}],
                   :results => [{:name => "query", :global_var => "context_query"}, 
                                {:name => "context_name", :global_var => "context_name"}, 
                                {:name => "first_class", :global_var => "context_title"}]
-                }]      
+                }]
+=end      
     }
 
     child = {:value => m, :children => []}
@@ -1377,7 +1381,7 @@ class OntologiesController < ApplicationController
       {
         :key=>(index += 1), 
         :text=>klass[:className], 
-        :next=>currentId[0, previousId.length-12] + "." + (index-1).to_s + ".0.0.1.0.0"
+        :next=>currentId[0, previousId.length-8] + "." + (index-1).to_s + ".0.1.0.0"
       }
     }
     
