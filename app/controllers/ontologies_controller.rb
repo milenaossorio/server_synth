@@ -776,7 +776,8 @@ class OntologiesController < ApplicationController
                                {:type => "global_var", :name => "title", :value => "context_title"}],
                     :results => [{:name => "context", :global_var => "context_id"}, 
                                  {:name => "defaultIndex", :global_var => "index_id"}]
-                  }]
+                  }
+              ]
       }
       child = {:value => m, :children => []}
       fatherFlowTree[:children].push(child)
@@ -947,6 +948,10 @@ class OntologiesController < ApplicationController
                       {
                         :function_name => "pop_global_var_is_not_empty",
                         :params => [{:type => "constant", :name => "key", :value => "context_id"}]
+                      }, 
+                      {
+                        :function_name => "pop_global_var_is_not_empty",
+                        :params => [{:type => "constant", :name => "key", :value => "context_name"}]
                       }
                     ]
         }
@@ -1007,6 +1012,10 @@ class OntologiesController < ApplicationController
                       {
                         :function_name => "pop_global_var_is_not_empty",
                         :params => [{:type => "constant", :name => "key", :value => "context_id"}]
+                      }, 
+                      {
+                        :function_name => "pop_global_var_is_not_empty",
+                        :params => [{:type => "constant", :name => "key", :value => "context_name"}]
                       }
                    ]
         }
@@ -1106,7 +1115,7 @@ class OntologiesController < ApplicationController
                 :function_name => "create_landmark_wizard",
                 :params => [
                     { :type => "global_var", :name => "landmark_type", :value => "landmark_type"}, 
-                    { :type => "constant", :name => "name", :value => className}
+                    { :type => "global_var", :name => "name", :value => "context_name"}
                 ]
               }, 
               {
@@ -1114,6 +1123,9 @@ class OntologiesController < ApplicationController
                 :params => [
                     {:type => "constant", :name => "key", :value => "context_id"}
                 ]
+              },
+              {:function_name => "pop_global_var",
+               :params => [{ :type => "constant", :name => "key", :value => "context_name"}]
               }
       ]
     }
@@ -1347,7 +1359,6 @@ class OntologiesController < ApplicationController
                   :params => [{:type => "user_action", :name => "scope", :value => "scope"}, 
                               {:type => "constant", :name => "ontology", :value => "auction"}],
                   :results => [{:name => "query", :global_var => "context_query"}, 
-                               {:name => "context_name", :global_var => "context_name"}, 
                                {:name => "first_class", :global_var => "context_title"}]
                 }]
     }
