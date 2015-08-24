@@ -80,7 +80,6 @@ ActionController::Routing::Routes.draw do |map|
   map.connect 'in_context_classes/create_api', :controller => :in_context_classes, :action => :create_api, :via => :post
   map.connect 'ontologies/wizard/:url', :controller => :ontologies, :action => :wizard, :requirements => { :url => /.*/}
   map.connect 'ontologies/examples/:url', :controller => :ontologies, :action => :examples, :requirements => { :url => /.*/}
-  map.connect 'ontologies/examples/:url', :controller => :ontologies, :action => :examples, :requirements => { :url => /.*/}
 
   # See how all your routes lay out with "rake routes"
 
