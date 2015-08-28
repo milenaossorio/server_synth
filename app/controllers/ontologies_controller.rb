@@ -250,7 +250,7 @@ class OntologiesController < ApplicationController
 
     resources.each{|x| 
       result += x.direct_properties.select{|y| !(y.first.is_a?(RDFS::Resource))}.
-                collect{|property| a = property.compact_uri.to_s; a.gsub("#{@url}", "#{@ontology}::")}
+                collect{|property| a = property.compact_uri.to_s; a.gsub("#{@url}", "#{@ontology}").gsub(":", "::")}
     }
     result = result.uniq
     result = ["The '#{className}' has no datatype property"] if result.empty?
@@ -948,7 +948,11 @@ class OntologiesController < ApplicationController
                       {
                         :function_name => "pop_global_var_is_not_empty",
                         :params => [{:type => "constant", :name => "key", :value => "context_id"}]
-                      }, 
+                      },
+                      {
+                        :function_name => "pop_global_var_is_not_empty",
+                        :params => [{:type => "constant", :name => "key", :value => "in_context_class_id"}]
+                      },
                       {
                         :function_name => "pop_global_var_is_not_empty",
                         :params => [{:type => "constant", :name => "key", :value => "context_name"}]
@@ -1088,12 +1092,21 @@ class OntologiesController < ApplicationController
     m = {
       :id => currentId, :title => "Select where one should click to choose an #{className}",
       :type => "attributeForChoosing", :needNextProcessing => true, :message => "#{className} Detail",
-      :originalModal => "You clicked on the {0}. Do you want to use the {0} to choose a(n) #{className}",
-      :modal => "You clicked on the {0}. Do you want to use the {0} to choose a(n) #{className}",
+      :scope => "new",
+      :scope_value => {:show => "none", :data => [], :type => [], :queries => [], :names => [], :examples => []},
+      #:originalModal => "You clicked on the {0}. Do you want to use the {0} to choose a(n) #{className}",
+      #:modal => "You clicked on the {0}. Do you want to use the {0} to choose a(n) #{className}",
       :example => className,
       :options => [
         {:key => 0, :next => previousId[0, previousId.length-4] + ".0.1.0.0-H"}
-      ]
+      ],
+      :todo => [{:function_name => "create_anchor_key", 
+                 :params => [{:type => "global_var", :name => "parent_id", :value => "index_id"}, 
+                             {:type => "user_action", :name => "selectedAttribute", :value => "selectedOption"}
+                            ],
+                 :results => [{:name => "key", :global_var => "anchor_att_id"}]
+                }
+               ]
     }
     child = {:value => m, :children => []}
     fatherFlowTree[:children].push(child)
@@ -1197,8 +1210,8 @@ class OntologiesController < ApplicationController
       :type => "attributeForChoosing", :message => "#{className}s", :example => className,
       :scope => "new", 
       :scope_value => {:show => "none", :data => [], :type => [], :queries => [], :names => [], :examples => []},
-      :originalModal => "You clicked on the {0}. Do you want to use the {0} to choose a(n) #{className}",
-      :modal => "You clicked on the {0}. Do you want to use the {0} to choose a(n) #{className}",
+      #:originalModal => "You clicked on the {0}. Do you want to use the {0} to choose a(n) #{className}",
+      #:modal => "You clicked on the {0}. Do you want to use the {0} to choose a(n) #{className}",
       :options => [
         {:key => 0, :next => currentId + ".0-H"}
       ],
@@ -1257,10 +1270,10 @@ class OntologiesController < ApplicationController
       :message => "Do you want to show more attributes in the #{className} list? Which type?",
       :example => className,
       :options => [
-        {:key => 0, :text => "Direct attributes of an #{className}", :next => previousId[0, previousId.length-6] + ".0"},
-        {:key => 1, :text => "Attributes of other classes related to #{className}", :next => previousId[0, previousId.length-4]},
-        {:key => 2, :text => "Computed Attributes", :next => previousId[0, previousId.length-6] + ".2"},
-        {:key => 3, :text => "No more", :next => previousId[0, previousId.length-8] + ".1"}
+        {:key => 0, :text => "No more", :next => previousId[0, previousId.length-8] + ".1", :hidden => true},
+        {:key => 1, :text => "Direct attributes of an #{className}", :next => previousId[0, previousId.length-6] + ".0"},
+        {:key => 2, :text => "Attributes of other classes related to #{className}", :next => previousId[0, previousId.length-4]},
+        {:key => 3, :text => "Computed Attributes", :next => previousId[0, previousId.length-6] + ".2"}
       ]
     }
     child = {:value => m, :children => []}
@@ -1310,10 +1323,10 @@ class OntologiesController < ApplicationController
       :message => "Do you want to show more attributes in the #{className} detail? Which type?",
       :example => className,
       :options => [
-        {:key => 0, :text => "Direct attributes of a(n) #{className}", :next => previousId[0, previousId.length-6] + ".0"},
-        {:key => 1, :text => "Attributes of other classes related to #{className}", :next => previousId[0, previousId.length-4]},
-        {:key => 2, :text => "Computed Attributes", :next => previousId[0, previousId.length-6] + ".2"},
-        {:key => 3, :text => "No more", :next => previousId[0, previousId.length-8] + ".1"}
+        {:key => 0, :text => "No more", :next => previousId[0, previousId.length-8] + ".1", :hidden => true},
+        {:key => 1, :text => "Direct attributes of a(n) #{className}", :next => previousId[0, previousId.length-6] + ".0"},
+        {:key => 2, :text => "Attributes of other classes related to #{className}", :next => previousId[0, previousId.length-4]},
+        {:key => 3, :text => "Computed Attributes", :next => previousId[0, previousId.length-6] + ".2"}
       ]
     }
     child = {:value => m, :children => []}
