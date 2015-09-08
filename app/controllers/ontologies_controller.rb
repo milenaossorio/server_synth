@@ -11,8 +11,12 @@ class OntologiesController < ApplicationController
     @relations = []
     @props_declaration = []
     @domain_classes = []
-    @url = "http://www.semanticweb.org/milena/ontologies/2013/6/auction#"
-    @ontology = "auction"
+    # @url = "http://www.semanticweb.org/milena/ontologies/2013/6/auction#"
+    # @ontology = "auction"
+    @url = "http://www.semanticweb.org/milena/ontologies/2015/7/eventpuc#"
+    @ontology = "eventpuc"
+    
+    @domain_classes = get_domain_classes_from(params[:url] || @url)
 
   end
   
@@ -26,8 +30,7 @@ class OntologiesController < ApplicationController
   def wizard
     
     init()
-    
-    @domain_classes = get_domain_classes_from(params[:url] || 'http://www.semanticweb.org/milena/ontologies/2013/6/auction')
+   
    # domain_classes += get_domain_classes_from('http://data.semanticweb.org/ns/swc/ontology#')
    # domain_classes += get_domain_classes_from('http://xmlns.com/wordnet/1.6/')
       
@@ -35,7 +38,7 @@ class OntologiesController < ApplicationController
     #result = @namespaces.keys.map{|key| "#{key} - #{@namespaces[key]}"}
     
     wizard = []
-    flowTree = class_step("0.0.0", @domain_classes, "auction")
+    flowTree = class_step("0.0.0", @domain_classes, @ontology)
     
     breadthFirstSearch(flowTree, wizard)
     
@@ -78,7 +81,7 @@ class OntologiesController < ApplicationController
      # wizard = domain_classes
     #wizard = result
     
-    render :json => {:windows=> wizard, :data => get_data_of_wizard}
+    render :json => {:windows=> wizard, :data => get_data_of_wizard, :example => get_examples}
 
     
     # render :json => {:windows=>wizard.select { |e| e[:value].length > 0 }}
@@ -108,9 +111,11 @@ class OntologiesController < ApplicationController
   end
   
   def examples
-    
     init()
-    
+    render :json => get_examples
+  end
+  
+  def get_examples
     examples = {:definition => [], :triples => []}
     @domain_classes.each{|_class|
       temp = generate_triples_examples(_class[:className], @max_number_examples)
@@ -120,9 +125,7 @@ class OntologiesController < ApplicationController
     
     examples[:definition] = group_domain_and_range_by_property_name(examples[:definition].flatten)
     examples[:triples] = examples[:triples].flatten.uniq
-
-    render :json => examples;
-    
+    return examples
   end
   
   def get_path_examples(initialClass, path) #it is not used. It is in app.js
@@ -1111,7 +1114,7 @@ class OntologiesController < ApplicationController
     child = {:value => m, :children => []}
     fatherFlowTree[:children].push(child)
     
-    class_step_1(currentId, className, get_related_collections(className), "auction", child) #43
+    class_step_1(currentId, className, get_related_collections(className), @ontology, child) #43
 
   end
 
@@ -1225,8 +1228,8 @@ class OntologiesController < ApplicationController
     }
     child = {:value => m, :children => []}
     fatherFlowTree[:children].push(child)
-    hidden_window(currentId, className, "auction", child)
-    class_step_1(currentId, className, get_related_collections(className), "auction", child) #43
+    hidden_window(currentId, className, @ontology, child)
+    class_step_1(currentId, className, get_related_collections(className), @ontology, child) #43
 
   end
 
@@ -1339,11 +1342,121 @@ class OntologiesController < ApplicationController
     m = {:id => currentId, :type => 'select', :title => "What do you want to show from #{prefix} ontology?",
       :mainclass => className, :message => 'Class', :options => []}
     m[:options] = relatedCollections.map{|klass| {:key=>(index += 1), :text=>klass, :next=>currentId + "." + index.to_s}}
+    m[:options].push({
+        :key=> index + 1,
+        :text => "Details of the #{className}",
+        :next => "#{previousId}-N"
+      })
     
     child = {:value => m, :children => []}
     fatherFlowTree[:children].push(child)
     
     suggest_paths_1(currentId, relatedCollections, child) #44
+    structure_name_1(m[:options].last[:next], className, fatherFlowTree) #18 + N
+  end
+  
+  def structure_name_1(id, prefix, fatherFlowTree) #18 + N
+    print "------------#{id}\n--------------------------"
+    nextId = id.scan(/((\d+\.){5})/)[0][0]
+      m = {
+              :id => id,
+              :type => "nodeName",
+              :title => "New navegational structure",
+              :message => "Name",
+              :options => [
+                {
+                  :key => 0,
+                  :next => nextId + '1'
+                }
+              ],
+              :value => "Details of the #{prefix}",
+              :todo => [
+              {
+              :function_name => "create_in_context_class_wizard",
+              :params => [
+                {
+                  :type => "constant",
+                  :name => "class",
+                  :value => @url + prefix
+                }, {
+                  :type => "global_var",
+                  :name => "context",
+                  :value => "context_id"
+                }
+              ],
+              :results => [
+                {
+                  :name => "in_context_class",
+                  :global_var => "in_context_class_id"
+                }
+              ]
+            },
+        {
+          :function_name => "set_anchor_values",
+          :params => [
+            {
+              :type => "global_var",
+              :name => "anchor_att_id",
+              :value => "anchor_att_id"
+            }, {
+              :type => "global_var",
+              :name => "parent_id",
+              :value => "context_id"
+            }, {
+              :type => "constant",
+              :name => "anchor_type",
+              :value => "details from index"
+            }, {
+              :type => "global_var",
+              :name => "index",
+              :value => "index_id"
+            }
+          ]
+        },
+        {
+          :function_name => "save_value",
+          :params => [
+            {
+              :type => "global_var",
+              :name => "index_id",
+              :value => "index_id"
+            }
+          ]
+        },
+        {
+          :function_name => "save_value",
+          :params => [
+            {
+              :type => "global_var",
+              :name => "context_id",
+              :value => "context_id"
+            }
+          ]
+        },
+        {
+          :function_name => "save_value",
+          :params => [
+            {
+              :type => "user_action",
+              :name => "context_name",
+              :value => "value"
+            }
+          ]
+        },
+        {
+          :function_name => "save_value",
+          :params => [
+            {
+              :type => "constant",
+              :name => "landmark_type",
+              :value => "details"
+            }
+          ]
+        }   
+      ]
+      }
+      child = {:value => m, :children => []}
+      fatherFlowTree[:children].push(child)
   end
   
   def suggest_paths_1(previousId, classes, fatherFlowTree) #44
@@ -1370,7 +1483,7 @@ class OntologiesController < ApplicationController
       :todo => [{
                   :function_name => "get_query_expression_from_path_wizard",
                   :params => [{:type => "user_action", :name => "scope", :value => "scope"}, 
-                              {:type => "constant", :name => "ontology", :value => "auction"}],
+                              {:type => "constant", :name => "ontology", :value => @ontology}],
                   :results => [{:name => "query", :global_var => "context_query"}, 
                                {:name => "first_class", :global_var => "context_title"}]
                 }]
