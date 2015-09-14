@@ -294,7 +294,7 @@ class OntologiesController < ApplicationController
        end
      }
      
-     collections
+     collections.uniq
   end
   
   
@@ -319,6 +319,7 @@ class OntologiesController < ApplicationController
     
     _class = RDFS::Class.find_all().select{|x| ActiveRDF::Namespace.localname(x.uri) == className}.first
     resource = ActiveRDF::ObjectManager.construct_class(_class).find_all.first
+    @cache_collections[className] = []
     
     unless resource.nil? then
       collections = resource.direct_properties.select{|y| y.first.is_a?(RDFS::Resource)}.collect{|r|
@@ -334,9 +335,9 @@ class OntologiesController < ApplicationController
       collections = collections.map{|c| c.localname}.reject{|x| x == "NamedIndividual"}.uniq
       collections.shift
       @cache_collections[className] = collections
-    else
-      @cache_collections[className] = []
-    end     
+    end
+    @cache_collections[className] = @domain_classes.map{|c| c[:className]}.select{|x| @cache_collections[className].include?(x)}
+    
     #return ["Article", "Book", "Conference", "Event", "Person", "Document"]
   end
   
@@ -849,7 +850,7 @@ class OntologiesController < ApplicationController
     props = get_compact_uri_datatype_properties(className)
     currentId = previousId.to_s + ".0"
     m = {
-      :id => currentId, :title => "PUT TITLE 30", :type => "infoWithOptions", 
+      :id => currentId, :title => "", :type => "infoWithOptions", 
       :scope => "new", :scope_value => {:show => "table", 
                                         :data => [0], 
                                         :type => props.collect{"ComputedAttribute"},
@@ -924,7 +925,7 @@ class OntologiesController < ApplicationController
     currentId = previousId.to_s + ".1"
     m = {
       :id => currentId,
-      :title => "PUT TITLE",
+      :title => "",
       :type => "loop",
       :message => "#{className} Detail",
       :messageOptions => "Do you want to choose anything to navigate to other screen?",
@@ -1123,7 +1124,7 @@ class OntologiesController < ApplicationController
     m = {
       :id => currentId, :title => "What do you want to do?", :type => "radio", :message => "",
       :options => [
-        {:key => 0, :text => "Go to the pages index", :next => "0.0.0.0", :child => "Landmark"},
+        {:key => 0, :text => "List of starting point", :next => "0.0.0.0", :child => "Landmark"},
         {:key => 1, :text => "Finish the application definition", :next => "#{currentId}."}
       ],
       :todo =>  [
@@ -1356,7 +1357,6 @@ class OntologiesController < ApplicationController
   end
   
   def structure_name_1(id, prefix, fatherFlowTree) #18 + N
-    print "------------#{id}\n--------------------------"
     nextId = id.scan(/((\d+\.){5})/)[0][0]
       m = {
               :id => id,
