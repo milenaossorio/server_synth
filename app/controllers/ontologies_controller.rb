@@ -30,8 +30,7 @@ class OntologiesController < ApplicationController
   def wizard
     
     init()
-    
-    @domain_classes = get_domain_classes_from(params[:url] || @url)
+    @domain_classes = get_domain_classes_from(@url)
    # domain_classes += get_domain_classes_from('http://data.semanticweb.org/ns/swc/ontology#')
    # domain_classes += get_domain_classes_from('http://xmlns.com/wordnet/1.6/')
       
@@ -82,7 +81,7 @@ class OntologiesController < ApplicationController
      # wizard = domain_classes
     #wizard = result
     
-    render :json => {:windows=> wizard, :data => get_data_of_wizard}
+    render :json => {:windows=> wizard, :data => get_data_of_wizard, :example => get_examples}
 
     
     # render :json => {:windows=>wizard.select { |e| e[:value].length > 0 }}
@@ -112,9 +111,11 @@ class OntologiesController < ApplicationController
   end
   
   def examples
-    
     init()
-    
+    render :json => get_examples
+  end
+  
+  def get_examples
     examples = {:definition => [], :triples => []}
     @domain_classes.each{|_class|
       temp = generate_triples_examples(_class[:className], @max_number_examples)
@@ -124,9 +125,7 @@ class OntologiesController < ApplicationController
     
     examples[:definition] = group_domain_and_range_by_property_name(examples[:definition].flatten)
     examples[:triples] = examples[:triples].flatten.uniq
-
-    render :json => examples;
-    
+    return examples
   end
   
   def get_path_examples(initialClass, path) #it is not used. It is in app.js
@@ -255,7 +254,7 @@ class OntologiesController < ApplicationController
 
     resources.each{|x| 
       result += x.direct_properties.select{|y| !(y.first.is_a?(RDFS::Resource))}.
-                collect{|property| a = property.compact_uri.to_s; a.gsub("#{@url}", "#{@ontology}::")}
+                collect{|property| a = property.compact_uri.to_s; a.gsub("#{@url}", "#{@ontology}").gsub(":", "::")}
     }
     result = result.uniq
     result = ["The '#{className}' has no datatype property"] if result.empty?
@@ -956,7 +955,11 @@ class OntologiesController < ApplicationController
                       {
                         :function_name => "pop_global_var_is_not_empty",
                         :params => [{:type => "constant", :name => "key", :value => "context_id"}]
-                      }, 
+                      },
+                      {
+                        :function_name => "pop_global_var_is_not_empty",
+                        :params => [{:type => "constant", :name => "key", :value => "in_context_class_id"}]
+                      },
                       {
                         :function_name => "pop_global_var_is_not_empty",
                         :params => [{:type => "constant", :name => "key", :value => "context_name"}]
@@ -1106,13 +1109,22 @@ class OntologiesController < ApplicationController
     m = {
       :id => currentId, :title => "Select where one should click to choose an #{className}",
       :type => "attributeForChoosing", :needNextProcessing => true, :message => "#{className} Detail",
-      :originalModal => "You clicked on the {0}. Do you want to use the {0} to choose a(n) #{className}",
-      :modal => "You clicked on the {0}. Do you want to use the {0} to choose a(n) #{className}",
+      :scope => "new",
+      :scope_value => {:show => "none", :data => [], :type => [], :queries => [], :names => [], :examples => []},
+      #:originalModal => "You clicked on the {0}. Do you want to use the {0} to choose a(n) #{className}",
+      #:modal => "You clicked on the {0}. Do you want to use the {0} to choose a(n) #{className}",
       :example => className,
       :options => [
         {:key => 0, :next => trim_last_levels(previousId, 2) + ".0.1.0.0-H"}
         # {:key => 0, :next => previousId[0, previousId.length-4] + ".0.1.0.0-H"}
-      ]
+      ],
+      :todo => [{:function_name => "create_anchor_key", 
+                 :params => [{:type => "global_var", :name => "parent_id", :value => "index_id"}, 
+                             {:type => "user_action", :name => "selectedAttribute", :value => "selectedOption"}
+                            ],
+                 :results => [{:name => "key", :global_var => "anchor_att_id"}]
+                }
+               ]
     }
     child = {:value => m, :children => []}
     fatherFlowTree[:children].push(child)
@@ -1216,8 +1228,8 @@ class OntologiesController < ApplicationController
       :type => "attributeForChoosing", :message => "#{className}s", :example => className,
       :scope => "new", 
       :scope_value => {:show => "none", :data => [], :type => [], :wizardType => [], :queries => [], :names => [], :examples => []},
-      :originalModal => "You clicked on the {0}. Do you want to use the {0} to choose a(n) #{className}",
-      :modal => "You clicked on the {0}. Do you want to use the {0} to choose a(n) #{className}",
+      #:originalModal => "You clicked on the {0}. Do you want to use the {0} to choose a(n) #{className}",
+      #:modal => "You clicked on the {0}. Do you want to use the {0} to choose a(n) #{className}",
       :options => [
         {:key => 0, :next => currentId + ".0-H"}
       ],
@@ -1276,16 +1288,11 @@ class OntologiesController < ApplicationController
       :message => "Do you want to show more attributes in the #{className} list? Which type?",
       :example => className,
       :options => [
+		{:key => 0, :text => "No more", :next => trim_last_levels(previousId, 4) + ".1", :hidden => true},
+        {:key => 1, :text => "Direct attributes of an #{className}", :next => trim_last_levels(previousId, 3) + ".0"},
+        {:key => 2, :text => "Attributes of other classes related to #{className}", :next => trim_last_levels(previousId, 2)},
+        {:key => 3, :text => "Computed Attributes", :next => trim_last_levels(previousId, 3) + ".2"}
         
-        # {:key => 0, :text => "Direct attributes of an #{className}", :next => previousId[0, previousId.length-6] + ".0"},
-        # {:key => 1, :text => "Attributes of other classes related to #{className}", :next => previousId[0, previousId.length-4]},
-        # {:key => 2, :text => "Computed Attributes", :next => previousId[0, previousId.length-6] + ".2"},
-        # {:key => 3, :text => "No more", :next => previousId[0, previousId.length-8] + ".1"}
-        
-        {:key => 0, :text => "Direct attributes of an #{className}", :next => trim_last_levels(previousId, 3) + ".0"},
-        {:key => 1, :text => "Attributes of other classes related to #{className}", :next => trim_last_levels(previousId, 2)},
-        {:key => 2, :text => "Computed Attributes", :next => trim_last_levels(previousId, 3) + ".2"},
-        {:key => 3, :text => "No more", :next => trim_last_levels(previousId, 4) + ".1"}
       ]
     }
     child = {:value => m, :children => []}
@@ -1335,15 +1342,10 @@ class OntologiesController < ApplicationController
       :message => "Do you want to show more attributes in the #{className} detail? Which type?",
       :example => className,
       :options => [
-        # {:key => 0, :text => "Direct attributes of a(n) #{className}", :next => previousId[0, previousId.length-6] + ".0"},
-        # {:key => 1, :text => "Attributes of other classes related to #{className}", :next => previousId[0, previousId.length-4]},
-        # {:key => 2, :text => "Computed Attributes", :next => previousId[0, previousId.length-6] + ".2"},
-        # {:key => 3, :text => "No more", :next => previousId[0, previousId.length-8] + ".1"}
-        
-        {:key => 0, :text => "Direct attributes of a(n) #{className}", :next => trim_last_levels(previousId, 3) + ".0"},
-        {:key => 1, :text => "Attributes of other classes related to #{className}", :next => trim_last_levels(previousId, 2)},
-        {:key => 2, :text => "Computed Attributes", :next => trim_last_levels(previousId, 3) + ".2"},
-        {:key => 3, :text => "No more", :next => trim_last_levels(previousId, 4) + ".1"}
+		{:key => 0, :text => "No more", :next => trim_last_levels(previousId, 4) + ".1", :hidden => true},
+        {:key => 1, :text => "Direct attributes of a(n) #{className}", :next => trim_last_levels(previousId, 3) + ".0"},
+        {:key => 2, :text => "Attributes of other classes related to #{className}", :next => trim_last_levels(previousId, 2)},
+        {:key => 3, :text => "Computed Attributes", :next => trim_last_levels(previousId, 3) + ".2"}
       ]
     }
     child = {:value => m, :children => []}
@@ -1356,11 +1358,121 @@ class OntologiesController < ApplicationController
     m = {:id => currentId, :type => 'select', :title => "What do you want to show from #{prefix} ontology?",
       :mainclass => className, :message => 'Class', :options => []}
     m[:options] = relatedCollections.map{|klass| {:key=>(index += 1), :text=>klass, :next=>currentId + "." + index.to_s}}
+    m[:options].push({
+        :key=> index + 1,
+        :text => "Details of the #{className}",
+        :next => "#{previousId}-N"
+      })
     
     child = {:value => m, :children => []}
     fatherFlowTree[:children].push(child)
     
     suggest_paths_1(currentId, relatedCollections, child) #44
+    structure_name_1(m[:options].last[:next], className, fatherFlowTree) #18 + N
+  end
+  
+  def structure_name_1(id, prefix, fatherFlowTree) #18 + N
+    print "------------#{id}\n--------------------------"
+    nextId = id.scan(/((\d+\.){5})/)[0][0]
+      m = {
+              :id => id,
+              :type => "nodeName",
+              :title => "New navegational structure",
+              :message => "Name",
+              :options => [
+                {
+                  :key => 0,
+                  :next => nextId + '1'
+                }
+              ],
+              :value => "Details of the #{prefix}",
+              :todo => [
+              {
+              :function_name => "create_in_context_class_wizard",
+              :params => [
+                {
+                  :type => "constant",
+                  :name => "class",
+                  :value => @url + prefix
+                }, {
+                  :type => "global_var",
+                  :name => "context",
+                  :value => "context_id"
+                }
+              ],
+              :results => [
+                {
+                  :name => "in_context_class",
+                  :global_var => "in_context_class_id"
+                }
+              ]
+            },
+        {
+          :function_name => "set_anchor_values",
+          :params => [
+            {
+              :type => "global_var",
+              :name => "anchor_att_id",
+              :value => "anchor_att_id"
+            }, {
+              :type => "global_var",
+              :name => "parent_id",
+              :value => "context_id"
+            }, {
+              :type => "constant",
+              :name => "anchor_type",
+              :value => "details from index"
+            }, {
+              :type => "global_var",
+              :name => "index",
+              :value => "index_id"
+            }
+          ]
+        },
+        {
+          :function_name => "save_value",
+          :params => [
+            {
+              :type => "global_var",
+              :name => "index_id",
+              :value => "index_id"
+            }
+          ]
+        },
+        {
+          :function_name => "save_value",
+          :params => [
+            {
+              :type => "global_var",
+              :name => "context_id",
+              :value => "context_id"
+            }
+          ]
+        },
+        {
+          :function_name => "save_value",
+          :params => [
+            {
+              :type => "user_action",
+              :name => "context_name",
+              :value => "value"
+            }
+          ]
+        },
+        {
+          :function_name => "save_value",
+          :params => [
+            {
+              :type => "constant",
+              :name => "landmark_type",
+              :value => "details"
+            }
+          ]
+        }   
+      ]
+      }
+      child = {:value => m, :children => []}
+      fatherFlowTree[:children].push(child)
   end
   
   def suggest_paths_1(previousId, classes, fatherFlowTree) #44
