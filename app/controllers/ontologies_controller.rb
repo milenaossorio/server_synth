@@ -13,24 +13,24 @@ class OntologiesController < ApplicationController
     @domain_classes = []
     # @url = "http://www.semanticweb.org/milena/ontologies/2013/6/auction#"
     # @ontology = "auction"
-    @url = "http://www.semanticweb.org/milena/ontologies/2015/7/eventpuc#"
-    @ontology = "eventpuc"
-    
-    @domain_classes = get_domain_classes_from(params[:url] || @url)
+      @url = params[:url]
+      @ontology = ActiveRDF::Namespace.localname(params[:url])
+    # @url = "http://www.semanticweb.org/milena/ontologies/2015/7/EventPUC.owl#"
+    # @ontology = "eventpuc"
 
   end
   
-  def test
-    
-    result = AUCTION::Produto.find_all
-    return {:a => result}
-   
-  end
+  # def test
+#     
+    # result = AUCTION::Produto.find_all
+    # return {:a => result}
+#    
+  # end
 
   def wizard
     
     init()
-   
+    @domain_classes = get_domain_classes_from(@url)
    # domain_classes += get_domain_classes_from('http://data.semanticweb.org/ns/swc/ontology#')
    # domain_classes += get_domain_classes_from('http://xmlns.com/wordnet/1.6/')
       
@@ -205,6 +205,7 @@ class OntologiesController < ApplicationController
       res.direct_properties.select{|y| !(y.first.is_a?(RDFS::Resource))}.select{|x| props.include?(x.label.first || x.localname || x.compact_uri)}.
       each{|property| hash[(property.label.first || property.localname || property.compact_uri) ] = property.to_s } #(property.label.first || property.compact_uri).to_sym
       props.each{|prop| unless hash.include?(prop) then hash[prop] = 'No value' end}
+      props.each{|prop| unless hash[prop].length < 151 then hash[prop] = hash[prop][0, 150] + '...' end}
       result.push(hash)
     }.uniq.compact
 
@@ -831,6 +832,7 @@ class OntologiesController < ApplicationController
       :scope => "new", :scope_value => {:show => "details", 
                                         :data => props.each_with_index.collect{|prop, index| index}, 
                                         :type => props.collect{"ComputedAttribute"},
+                                        :wizardType => props.collect{"Direct attribute"},
                                         :queries => props.collect{|prop| "self." + prop},
                                         :names => datatypeProperties,
                                         :examples => []}, 
@@ -854,6 +856,7 @@ class OntologiesController < ApplicationController
       :scope => "new", :scope_value => {:show => "table", 
                                         :data => [0], 
                                         :type => props.collect{"ComputedAttribute"},
+                                        :wizardType => props.collect{"Direct attribute"},
                                         :queries => props.collect{|prop| "self." + prop},
                                         :names => get_datatype_properties(className),
                                         :examples => []},
@@ -883,6 +886,7 @@ class OntologiesController < ApplicationController
       :scope => "new", :scope_value => {:show => "table", 
                                         :data => props.each_with_index.collect{|prop, index| index}, 
                                         :type => props.collect{"ComputedAttribute"},
+                                        :wizardType => props.collect{"Direct attribute"},
                                         :queries => props.collect{|prop| "self." + prop},
                                         :names => get_datatype_properties(className),
                                         :examples => []},
@@ -992,6 +996,15 @@ class OntologiesController < ApplicationController
     computed_attribute_list(currentId, className, child)
 
   end
+  
+  def trim_last_levels(text, levelQuantity)
+    result = text.reverse
+    for i in 0..levelQuantity - 1
+       pos = result.index('.')
+       result = result[pos + 1..result.length]
+    end
+    return result.reverse
+  end
 
   def choose_examples_list_navigation_question(previousId, className, fatherFlowTree) #24
     currentId = previousId.to_s + ".1"
@@ -1001,7 +1014,8 @@ class OntologiesController < ApplicationController
       :example => className,
       :options => [
         {:key => 0, :text => "Yes", :child => "Yes", :next => currentId + ".0"},
-        {:key => 1, :text => "No", :child => "End", :next => previousId[0, previousId.length-4] + ".1.1.1.1",
+        {:key => 1, :text => "No", :child => "End", :next => trim_last_levels(previousId, 2) + ".1.1.1.1",
+        # {:key => 1, :text => "No", :child => "End", :next => previousId[0, previousId.length-4] + ".1.1.1.1",
           :todo => [
                       {
                         :function_name => "create_attributes_for_index_wizard",
@@ -1102,7 +1116,8 @@ class OntologiesController < ApplicationController
       #:modal => "You clicked on the {0}. Do you want to use the {0} to choose a(n) #{className}",
       :example => className,
       :options => [
-        {:key => 0, :next => previousId[0, previousId.length-4] + ".0.1.0.0-H"}
+        {:key => 0, :next => trim_last_levels(previousId, 2) + ".0.1.0.0-H"}
+        # {:key => 0, :next => previousId[0, previousId.length-4] + ".0.1.0.0-H"}
       ],
       :todo => [{:function_name => "create_anchor_key", 
                  :params => [{:type => "global_var", :name => "parent_id", :value => "index_id"}, 
@@ -1213,7 +1228,7 @@ class OntologiesController < ApplicationController
       :id => currentId, :title => "Select where one should click to choose a(n) #{className}",
       :type => "attributeForChoosing", :message => "#{className}s", :example => className,
       :scope => "new", 
-      :scope_value => {:show => "none", :data => [], :type => [], :queries => [], :names => [], :examples => []},
+      :scope_value => {:show => "none", :data => [], :type => [], :wizardType => [], :queries => [], :names => [], :examples => []},
       #:originalModal => "You clicked on the {0}. Do you want to use the {0} to choose a(n) #{className}",
       #:modal => "You clicked on the {0}. Do you want to use the {0} to choose a(n) #{className}",
       :options => [
@@ -1274,10 +1289,11 @@ class OntologiesController < ApplicationController
       :message => "Do you want to show more attributes in the #{className} list? Which type?",
       :example => className,
       :options => [
-        {:key => 0, :text => "No more", :next => previousId[0, previousId.length-8] + ".1", :hidden => true},
-        {:key => 1, :text => "Direct attributes of an #{className}", :next => previousId[0, previousId.length-6] + ".0"},
-        {:key => 2, :text => "Attributes of other classes related to #{className}", :next => previousId[0, previousId.length-4]},
-        {:key => 3, :text => "Computed Attributes", :next => previousId[0, previousId.length-6] + ".2"}
+		{:key => 0, :text => "No more", :next => trim_last_levels(previousId, 4) + ".1", :hidden => true},
+        {:key => 1, :text => "Direct attributes of an #{className}", :next => trim_last_levels(previousId, 3) + ".0"},
+        {:key => 2, :text => "Attributes of other classes related to #{className}", :next => trim_last_levels(previousId, 2)},
+        {:key => 3, :text => "Computed Attributes", :next => trim_last_levels(previousId, 3) + ".2"}
+        
       ]
     }
     child = {:value => m, :children => []}
@@ -1327,10 +1343,10 @@ class OntologiesController < ApplicationController
       :message => "Do you want to show more attributes in the #{className} detail? Which type?",
       :example => className,
       :options => [
-        {:key => 0, :text => "No more", :next => previousId[0, previousId.length-8] + ".1", :hidden => true},
-        {:key => 1, :text => "Direct attributes of a(n) #{className}", :next => previousId[0, previousId.length-6] + ".0"},
-        {:key => 2, :text => "Attributes of other classes related to #{className}", :next => previousId[0, previousId.length-4]},
-        {:key => 3, :text => "Computed Attributes", :next => previousId[0, previousId.length-6] + ".2"}
+		{:key => 0, :text => "No more", :next => trim_last_levels(previousId, 4) + ".1", :hidden => true},
+        {:key => 1, :text => "Direct attributes of a(n) #{className}", :next => trim_last_levels(previousId, 3) + ".0"},
+        {:key => 2, :text => "Attributes of other classes related to #{className}", :next => trim_last_levels(previousId, 2)},
+        {:key => 3, :text => "Computed Attributes", :next => trim_last_levels(previousId, 3) + ".2"}
       ]
     }
     child = {:value => m, :children => []}
@@ -1494,11 +1510,23 @@ class OntologiesController < ApplicationController
 
   end
   
+  def trim_first_levels(text, levels)
+    quant = 0
+    result = text
+    for i in 0..levels - 1
+       auxpos = result.index('.')
+       result = result[auxpos + 1 .. result.length-1]
+       quant = quant + auxpos + 1
+    end
+    return text[0.. quant - 2]
+  end
+  
   def hidden_step(previousId, fatherFlowTree) #46
     index = -1
     currentId = previousId + ".0"
     m = {:id => currentId, :type => 'hidden', :options => []}
-    m[:options] = @domain_classes.map{|klass| {:key=>(index += 1), :text=>klass[:className], :next=>currentId[0,7] + "." + index.to_s + "-1"}}
+    # m[:options] = @domain_classes.map{|klass| {:key=>(index += 1), :text=>klass[:className], :next=>currentId[0,7] + "." + index.to_s + "-1"}}
+    m[:options] = @domain_classes.map{|klass| {:key=>(index += 1), :text=>klass[:className], :next => trim_first_levels(previousId, 4) + "." + index.to_s + "-1"}}
     
     child = {:value => m, :children => []}
     fatherFlowTree[:children].push(child)      
@@ -1517,8 +1545,9 @@ class OntologiesController < ApplicationController
     m[:options] += @domain_classes.map{|klass| 
       {
         :key=>(index += 1), 
-        :text=>klass[:className], 
-        :next=>currentId[0, previousId.length-8] + "." + (index-1).to_s + ".0.1.0.0"
+        :text=>klass[:className],
+        # :next=>currentId[0, previousId.length-8] + "." + (index-1).to_s + ".0.1.0.0"
+        :next=> trim_last_levels(previousId, 4) + "." + (index-1).to_s + ".0.1.0.0"
       }
     }
     
