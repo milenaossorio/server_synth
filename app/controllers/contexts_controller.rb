@@ -86,6 +86,13 @@ class ContextsController < ApplicationController
     end
   end
   
+  def destroy_all
+    contexts = SHDM::Context.find_all()
+    basics = ["Any","ResourcesByClass","ResourcesByLabel","ClassesContext"]
+    contexts.select{|context| !basics.include? context.context_name.first}.each { |context|  context.destroy}
+    return contexts
+  end
+  
   def context_parameters
     jqgrid_children_index('context_parameters', [:id, :context_parameter_name])
   end

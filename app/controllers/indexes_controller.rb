@@ -98,6 +98,13 @@ class IndexesController < ApplicationController
       format.xml  { head :ok }
     end
   end
+  
+  def destroy_all
+    indexes = SHDM::Index.find_all()
+    basics = ["ClassesIndex","ResourcesByClassIndex","ResourcesByLabelIdx"]
+    indexes.select{|index| !basics.include? index.index_name.first}.each { |index|  index.destroy}
+    return indexes
+  end
 
   def get_resource_attributes
     attrs = params[:id] ? RDFS::Resource.find(params[:id]).attributes : {}

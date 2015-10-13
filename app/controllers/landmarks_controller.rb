@@ -127,6 +127,15 @@ class LandmarksController < ApplicationController
     end
   end
   
+  def destroy_all
+    landmarks = SHDM::Landmark.find_all()
+    basics = ["Classes"]
+    landmarks.select{|landmark| !basics.include? landmark.landmark_name.first}.each { |landmark|  
+      landmark.landmark_navigation_attribute.each{|v| v.destroy}
+      landmark.destroy}
+    return landmarks
+  end
+  
   def get_resource_attributes
     attrs = params[:id] ? RDFS::Resource.find(params[:id]).attributes : {}
     attrs.each{ |k, v| attrs[k] = v.to_s }

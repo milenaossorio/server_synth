@@ -36,6 +36,14 @@ class ApplicationsController < ApplicationController
     redirect_to :action => :index
   end
   
+  def reset
+    contexts = ContextsController.new.destroy_all
+    indexes = IndexesController.new.destroy_all
+    landmarks = LandmarksController.new.destroy_all
+    
+    render :json => {:result=> true, :contexts => contexts, :indexes => indexes, :landmarks => landmarks}
+  end
+  
   def activate_api
     Application.new(params[:name]).activate
     

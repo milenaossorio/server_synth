@@ -1,4 +1,9 @@
 ActionController::Routing::Routes.draw do |map|
+  
+  map.connect 'indexes/destroy_all', :controller => :indexes, :action => :destroy_all
+  map.connect 'contexts/destroy_all', :controller => :contexts, :action => :destroy_all
+  map.connect 'landmarks/destroy_all', :controller => :landmarks, :action => :destroy_all
+  map.connect 'applications/reset', :controller => :applications, :action => :reset
 
   map.resources :applications, :collection => { :shutdown => :get }
   map.resources :operations
@@ -71,6 +76,7 @@ ActionController::Routing::Routes.draw do |map|
 
   # You can have the root of your site routed with map.root -- just remember to delete public/index.html.
   map.root :controller => "applications"
+  
   
   map.connect 'applications/create_api', :controller => :applications, :action => :create_api, :via => :post
   map.connect 'applications/activate_api', :controller => :applications, :action => :activate_api, :via => :post
